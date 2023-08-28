@@ -31,7 +31,7 @@ public class buoyancy_forces : MonoBehaviour
             underwater = false;
         }
         if (underwater){
-            float buoyancy_force = waterDensity * Physics.gravity.y * volumeDisplaced;
+            float buoyancy_force = waterDensity * Physics.gravity.y * volumeDisplaced; // F = density * gravity accel * Volume
             //print(buoyancy_force);
             //print(Physics.gravity);
             m_Rigidbody.AddForce(new Vector3(0, -buoyancy_force, 0));
