@@ -8,7 +8,7 @@ public class buoyancy_forces : MonoBehaviour
     public float waterDensity = 1.025f; // kg/L
     public float volumeDisplaced = 0;
     Rigidbody m_Rigidbody;
-    bool underwater;
+    [HideInInspector] public bool underwater;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +23,7 @@ public class buoyancy_forces : MonoBehaviour
     }
 
     void FixedUpdate(){
-        print(m_Rigidbody.centerOfMass);
+        //print(m_Rigidbody.centerOfMass);
         float difference = transform.position.y + m_Rigidbody.centerOfMass.y - waterHeight;
         if (difference < 0){
             underwater = true;
