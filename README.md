@@ -6,5 +6,11 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 * Robot Simulation (Fake robot that emulate real robot, ie. is controlled by the same code and has the same sort of interaction with the environment)
 * Conveniences (Auto labeled bounding boxes, segmentation/depth imaging, data generation, maybe even RL)
 
+### Usage
+* Download Unity Hub and get a free license
+* Add this project to Unity Hub
+* When launching it will ask you to get editor version `2023.1.8f1`, you need this (higher might work)
+* It should be good to go, no extra installs should be needed
+
 ### Note
 If you need a working data generation that is capable of generating synthetic data that works in the real world, please see the past repo that uses URP at [https://github.com/XingjianL/Robosub_Unity_Sim](https://github.com/XingjianL/Robosub_Unity_Sim)
