@@ -12,6 +12,9 @@ public class RobotForce : MonoBehaviour
     Vector3[] thruster_directions;
     const float KGF_TO_N = 9.80665f;
     const float MAX_FORCE = 2.36f*KGF_TO_N;
+
+    float timer = 0;
+    float random_thrust = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,7 +35,11 @@ public class RobotForce : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (timer > 2) {
+            timer = 0;
+            random_thrust = Random.Range(-1f,1f);
+        }
+        timer += Time.deltaTime;
     }
     void stop_thrust(){
         add_thruster_force(0, 0);
@@ -91,7 +98,7 @@ public class RobotForce : MonoBehaviour
         //SubmergeDepth = GetComponent<buoyancy_forces>().underwater;
         if (transform.position.y <= SubmergeDepth) {
             submerge(0);            
-            spin(-strength * KGF_TO_N);
+            spin(-strength * KGF_TO_N * random_thrust);
         } else {
             submerge(strength * KGF_TO_N);
         }
