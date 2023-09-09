@@ -10,6 +10,7 @@ public class robot_camera : MonoBehaviour
     public Camera downCamera;
     private int frontCounter;
     private int downCounter;
+    public int renderFramesCount = 1;
     public bool generateData = true;
     public int imgWidth = 640;
     public int imgHeight = 480;
@@ -17,6 +18,14 @@ public class robot_camera : MonoBehaviour
     public string downCamFolderName = "DownCam";
     private string frontCamSavePath;
     private string downCamSavePath;
+    private enum renderStatesEnum : int{
+        Off = 0,
+        PreRender = 1,
+        Rendering = 2,
+        Rendered = 3
+    };
+    private renderStatesEnum renderState;
+    private int currentFrames;
     void Start()
     {
         //mainCamera = Camera.main;
@@ -32,7 +41,14 @@ public class robot_camera : MonoBehaviour
             downCamSavePath = Application.persistentDataPath+"/"+downCamFolderName;
             System.IO.Directory.CreateDirectory(frontCamSavePath);
             System.IO.Directory.CreateDirectory(downCamSavePath);
+            Component[] temp = frontCamera.GetComponents(typeof(Component));
+            foreach (var comp in temp){
+                Debug.Log(temp.ToString());
+            }
         }
+        frontCamera.enabled = false;
+        downCamera.enabled = false;
+        renderState = renderStatesEnum.Off;
     }
 
     // Update is called once per frame
@@ -40,7 +56,33 @@ public class robot_camera : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            CaptureAll();
+            //CaptureAll();
+            renderState = renderStatesEnum.PreRender;
+            
+        }
+        //Debug.Log(renderState);
+        switch (renderState){
+            case renderStatesEnum.Off:
+                break;
+            case renderStatesEnum.PreRender:
+                frontCamera.enabled = true;
+                downCamera.enabled = true;
+                currentFrames = 0;
+                renderState = renderStatesEnum.Rendering;
+                break;
+            case renderStatesEnum.Rendering:
+                if (currentFrames >= renderFramesCount) {
+                    renderState = renderStatesEnum.Rendered;
+                }
+                currentFrames += 1;
+                break;
+            case renderStatesEnum.Rendered:
+                CaptureAll();
+                frontCamera.enabled = false;
+                downCamera.enabled = false;
+                currentFrames = 0;
+                renderState = renderStatesEnum.Off;
+                break;
         }
     }
     private void CaptureAll(){
@@ -103,7 +145,7 @@ public class robot_camera : MonoBehaviour
     void OnGUI(){
         var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
         if (GUI.Button(button_rect, "Capture")){
-            CaptureAll();
+            renderState = renderStatesEnum.PreRender;
         }
         GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);
         var front_cam_display = new Rect(2*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
