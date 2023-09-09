@@ -47,7 +47,7 @@ public class buoyancy_forces : MonoBehaviour
         }
         if (forceVisual){
             float environment_force_diff = (-buoyancy_force + m_Rigidbody.mass * Physics.gravity.y)/Mathf.Abs(Physics.gravity.y);
-            print(environment_force_diff);
+            //print(environment_force_diff);
             var force_visual = transform.Find("env_force_visual");
             if (force_visual != null){
                 force_visual.localScale = new Vector3(environment_force_diff/10,environment_force_diff/10,environment_force_diff/2);

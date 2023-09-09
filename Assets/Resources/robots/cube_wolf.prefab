@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4679153024487754561}
   - component: {fileID: 7370680687095338143}
   - component: {fileID: 3959664323246037925}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -171,7 +171,7 @@ GameObject:
   - component: {fileID: 4999416224904535085}
   - component: {fileID: 7058325053375472700}
   - component: {fileID: 392954660883536281}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -254,7 +254,7 @@ GameObject:
   - component: {fileID: 5736348802863249780}
   - component: {fileID: 5417527522114672086}
   - component: {fileID: 8021585704233786421}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -337,7 +337,7 @@ GameObject:
   - component: {fileID: 5591664438528469269}
   - component: {fileID: 2164343985203481978}
   - component: {fileID: 2954182719714196803}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -420,7 +420,7 @@ GameObject:
   - component: {fileID: 6163991597335567006}
   - component: {fileID: 4331838902865963692}
   - component: {fileID: 8624092926679233426}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -598,7 +598,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 2
@@ -877,7 +877,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 1
@@ -1093,7 +1093,7 @@ GameObject:
   - component: {fileID: 977343089101358583}
   - component: {fileID: 4570235603680204585}
   - component: {fileID: 5579139201248321452}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1208,7 +1208,7 @@ GameObject:
   - component: {fileID: 95462208590959817}
   - component: {fileID: 7628835667441718999}
   - component: {fileID: 6865792196957800732}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: env_force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1633,7 +1633,7 @@ GameObject:
   - component: {fileID: 8477863819111437468}
   - component: {fileID: 5948539655587753136}
   - component: {fileID: 83765027977007508}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1716,7 +1716,7 @@ GameObject:
   - component: {fileID: 427371623695734082}
   - component: {fileID: 5002071710400730724}
   - component: {fileID: 1787788540526009130}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: force_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
