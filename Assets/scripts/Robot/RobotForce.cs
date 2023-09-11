@@ -98,7 +98,7 @@ public class RobotForce : MonoBehaviour
         //SubmergeDepth = GetComponent<buoyancy_forces>().underwater;
         if (transform.position.y <= SubmergeDepth) {
             submerge(0);            
-            spin(-strength * KGF_TO_N * random_thrust);
+            //spin(-strength * KGF_TO_N * random_thrust);
         } else {
             submerge(strength * KGF_TO_N);
         }

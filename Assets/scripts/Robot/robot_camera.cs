@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Perception.GroundTruth;
 public class robot_camera : MonoBehaviour
 {
     // Start is called before the first frame update
     public Camera mainCamera;
     public Camera frontCamera;
     public Camera downCamera;
+    public PerceptionCamera frontPerceptionCameraScript;
     private int frontCounter;
     private int downCounter;
     public int renderFramesCount = 1;
@@ -88,6 +90,7 @@ public class robot_camera : MonoBehaviour
     private void CaptureAll(){
         frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
         downCounter = Capture(downCamera, downCamSavePath, downCounter);
+        frontPerceptionCameraScript.RequestCapture();
     }
     private int Capture(Camera cam, string save_path, int id){
         RenderTexture activeRT = RenderTexture.active;
