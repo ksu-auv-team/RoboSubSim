@@ -9,7 +9,12 @@ public class robot_camera : MonoBehaviour
     public Camera mainCamera;
     public Camera frontCamera;
     public Camera downCamera;
-    public PerceptionCamera frontPerceptionCameraScript;
+    public GameObject frontPerceptionCameraObject;
+    public GameObject downPerceptionCameraObject;
+    private PerceptionCamera frontPerceptionCameraScript;
+    private PerceptionCamera downPerceptionCameraScript;
+    private Camera frontPerceptionCamera;
+    private Camera downPerceptionCamera;
     private int frontCounter;
     private int downCounter;
     public int renderFramesCount = 1;
@@ -31,8 +36,10 @@ public class robot_camera : MonoBehaviour
     void Start()
     {
         //mainCamera = Camera.main;
+        //mainCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         //mainCamera.targetDisplay = 1;
         if (generateData){
+            //
             if (frontCamera.targetTexture == null){
                 frontCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
             }
@@ -43,13 +50,16 @@ public class robot_camera : MonoBehaviour
             downCamSavePath = Application.persistentDataPath+"/"+downCamFolderName;
             System.IO.Directory.CreateDirectory(frontCamSavePath);
             System.IO.Directory.CreateDirectory(downCamSavePath);
-            Component[] temp = frontCamera.GetComponents(typeof(Component));
-            foreach (var comp in temp){
-                Debug.Log(temp.ToString());
-            }
+
+            frontPerceptionCameraScript = frontPerceptionCameraObject.GetComponent<PerceptionCamera>();
+            frontPerceptionCamera = frontPerceptionCameraObject.GetComponent<Camera>();
+            frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+
+            downPerceptionCameraScript = downPerceptionCameraObject.GetComponent<PerceptionCamera>();
+            downPerceptionCamera = downPerceptionCameraObject.GetComponent<Camera>();
+            downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         }
-        frontCamera.enabled = false;
-        downCamera.enabled = false;
+        //MainCameraEnable();
         renderState = renderStatesEnum.Off;
     }
 
@@ -63,34 +73,62 @@ public class robot_camera : MonoBehaviour
             
         }
         //Debug.Log(renderState);
+        //int cam_count = downCamera.allCameras.Length;
+        //Debug.Log(cam_count);
         switch (renderState){
             case renderStatesEnum.Off:
+                //MainCameraEnable();
                 break;
             case renderStatesEnum.PreRender:
-                frontCamera.enabled = true;
-                downCamera.enabled = true;
-                currentFrames = 0;
-                renderState = renderStatesEnum.Rendering;
+                if (currentFrames >= renderFramesCount){
+                    currentFrames = 0;
+                    renderState = renderStatesEnum.Rendering;
+                }
+                MainCameraDisable();
+                currentFrames += 1;
                 break;
             case renderStatesEnum.Rendering:
                 if (currentFrames >= renderFramesCount) {
                     renderState = renderStatesEnum.Rendered;
+                    currentFrames = 0;
                 }
                 currentFrames += 1;
                 break;
             case renderStatesEnum.Rendered:
                 CaptureAll();
-                frontCamera.enabled = false;
-                downCamera.enabled = false;
+                MainCameraEnable();
                 currentFrames = 0;
                 renderState = renderStatesEnum.Off;
                 break;
         }
+        
+    }
+    private void MainCameraEnable(){
+        frontCamera.enabled = false;
+        downCamera.enabled = false;
+        frontPerceptionCamera.enabled = false;
+        downPerceptionCamera.enabled = false;
+        //frontPerceptionCameraScript.enabled = false;
+        //downPerceptionCameraScript.enabled = false;
+        mainCamera.enabled = true;
+        //mainCamera.depth = Camera.main.depth + 1;
+        //Debug.Log("Depth" + Camera.main.depth + " " + mainCamera.depth);
+    }
+    private void MainCameraDisable(){
+        frontCamera.enabled = true;
+        downCamera.enabled = true;
+        //frontPerceptionCameraScript.enabled = true;
+        //downPerceptionCameraScript.enabled = true;
+        frontPerceptionCamera.enabled = true;
+        downPerceptionCamera.enabled = true;
+        
+        mainCamera.enabled = false;
     }
     private void CaptureAll(){
         frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
         downCounter = Capture(downCamera, downCamSavePath, downCounter);
         frontPerceptionCameraScript.RequestCapture();
+        downPerceptionCameraScript.RequestCapture();
     }
     private int Capture(Camera cam, string save_path, int id){
         RenderTexture activeRT = RenderTexture.active;
@@ -145,12 +183,17 @@ public class robot_camera : MonoBehaviour
     //    Front_Capture();
     //    Down_Capture();
     //}
+    private float rotation_gui = 180f;
     void OnGUI(){
+        //GUIUtility.RotateAroundPivot(rotation_gui, new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
+        GUIUtility.ScaleAroundPivot(new Vector2(1, -1), new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
         var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
-        if (GUI.Button(button_rect, "Capture")){
-            renderState = renderStatesEnum.PreRender;
-        }
+        GUI.Label(button_rect, "Space to capture");
+        //Debug.Log(GUI.transform);
+        //Debug.Log(Camera.main.name);
         GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);
+        //var main_cam_display = new Rect(0, 0, mainCamera.pixelWidth, mainCamera.pixelHeight);
+        //GUI.DrawTexture(main_cam_display, mainCamera.targetTexture, ScaleMode.ScaleToFit);
         var front_cam_display = new Rect(2*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
         GUI.DrawTexture(front_cam_display, frontCamera.targetTexture, ScaleMode.ScaleToFit);
         var down_cam_display = new Rect(3*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
