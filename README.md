@@ -9,8 +9,9 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 ### Usage
 * Download Unity Hub and get a free license
 * Add this project to Unity Hub
-* When launching it will ask you to get editor version `2023.1.8f1`, you need this (higher might work)
-* It should be good to go, no extra installs should be needed
+* When launching it will ask you to get editor version `2023.1.8f1`, you need to install this version (higher might work)
+* You also need a custom package [https://github.com/XingjianL/com.eugeneteoh.perception](https://github.com/XingjianL/com.eugeneteoh.perception), install it by cloning that repo -> open editor -> package manager -> install package from disk [(see instruction)](https://docs.unity3d.com/Manual/upm-ui-local.html)
+* It should be good to go now.
 
 ### Note
 If you need a working data generation that is capable of generating synthetic data that works in the real world, please see the past repo that uses URP at [https://github.com/XingjianL/Robosub_Unity_Sim](https://github.com/XingjianL/Robosub_Unity_Sim)
