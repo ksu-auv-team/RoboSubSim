@@ -1,9 +1,10 @@
 {
   "dependencies": {
-    "com.eugeneteoh.perception": "file:D:/Unity/GitHub/com.eugeneteoh.perception/com.eugeneteoh.perception",
     "com.unity.collab-proxy": "2.0.5",
     "com.unity.feature.development": "1.0.2",
     "com.unity.ide.visualstudio": "2.0.20",
+    "com.unity.memoryprofiler": "1.0.0",
+    "com.unity.perception": "1.0.0-preview.1",
     "com.unity.render-pipelines.high-definition": "15.0.6",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.8.2",

@@ -84,7 +84,7 @@ public class robot_camera : MonoBehaviour
                     currentFrames = 0;
                     renderState = renderStatesEnum.Rendering;
                 }
-                MainCameraDisable();
+                RenderCameraEnable();
                 currentFrames += 1;
                 break;
             case renderStatesEnum.Rendering:
@@ -96,25 +96,27 @@ public class robot_camera : MonoBehaviour
                 break;
             case renderStatesEnum.Rendered:
                 CaptureAll();
-                MainCameraEnable();
+                RenderCameraDisable();
                 currentFrames = 0;
                 renderState = renderStatesEnum.Off;
                 break;
         }
         
     }
-    private void MainCameraEnable(){
+    private void RenderCameraDisable(){
         frontCamera.enabled = false;
         downCamera.enabled = false;
-        frontPerceptionCamera.enabled = false;
+        #if (WINDOWS)
+        frontPerceptionCamera.enabled = false; // idk why ubuntu has fps issue with this, might be Vulkan stuff
         downPerceptionCamera.enabled = false;
+        #endif
         //frontPerceptionCameraScript.enabled = false;
         //downPerceptionCameraScript.enabled = false;
         mainCamera.enabled = true;
         //mainCamera.depth = Camera.main.depth + 1;
         //Debug.Log("Depth" + Camera.main.depth + " " + mainCamera.depth);
     }
-    private void MainCameraDisable(){
+    private void RenderCameraEnable(){
         frontCamera.enabled = true;
         downCamera.enabled = true;
         //frontPerceptionCameraScript.enabled = true;
@@ -122,7 +124,7 @@ public class robot_camera : MonoBehaviour
         frontPerceptionCamera.enabled = true;
         downPerceptionCamera.enabled = true;
         
-        mainCamera.enabled = false;
+        mainCamera.enabled = true;
     }
     private void CaptureAll(){
         frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
@@ -184,11 +186,12 @@ public class robot_camera : MonoBehaviour
     //    Down_Capture();
     //}
     private float rotation_gui = 180f;
+    
     void OnGUI(){
         //GUIUtility.RotateAroundPivot(rotation_gui, new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
-        GUIUtility.ScaleAroundPivot(new Vector2(1, -1), new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
+        //GUIUtility.ScaleAroundPivot(new Vector2(1, -1), new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
         var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
-        GUI.Label(button_rect, "Space to capture");
+        GUI.Label(button_rect, "Space to capture" + (int)(1.0f / Time.smoothDeltaTime));
         //Debug.Log(GUI.transform);
         //Debug.Log(Camera.main.name);
         GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);
@@ -199,4 +202,5 @@ public class robot_camera : MonoBehaviour
         var down_cam_display = new Rect(3*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
         GUI.DrawTexture(down_cam_display, downCamera.targetTexture,  ScaleMode.ScaleToFit);
     }
+    
 }
