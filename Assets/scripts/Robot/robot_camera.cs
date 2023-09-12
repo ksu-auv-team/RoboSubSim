@@ -191,7 +191,9 @@ public class robot_camera : MonoBehaviour
         //GUIUtility.RotateAroundPivot(rotation_gui, new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
         //GUIUtility.ScaleAroundPivot(new Vector2(1, -1), new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
         var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
-        GUI.Label(button_rect, "Space to capture" + (int)(1.0f / Time.smoothDeltaTime));
+        if (GUI.Button(button_rect, "Space to capture, fps:" + (int)(1.0f / Time.smoothDeltaTime))){
+            renderState = renderStatesEnum.PreRender;
+        }
         //Debug.Log(GUI.transform);
         //Debug.Log(Camera.main.name);
         GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);
