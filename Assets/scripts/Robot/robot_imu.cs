@@ -70,6 +70,7 @@ public class robot_imu : MonoBehaviour
         imu.applyAccelNoise();
         imu.applyGyroNoise();
         imu.elapsedTime += Time.fixedDeltaTime;
-        print(imu.quaternion.eulerAngles);
+        //print(imu.quaternion.eulerAngles);
     }
+    
 }
