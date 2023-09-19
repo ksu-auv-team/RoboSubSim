@@ -3,7 +3,7 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 
 ### Targets
 * Photorealism (HDRP Water, Domain Randomizations, Successful Sim2Real Transfer)
-* Robot Simulation (Fake robot that emulate real robot, ie. is controlled by the same code and has the same sort of interaction with the environment)
+* Robot Simulation (Fake robot that emulates real robot, ie. is controlled by the same code and has the same sort of interaction with the environment)
 * Conveniences (Auto labeled bounding boxes, segmentation/depth imaging, data generation, maybe even RL)
 
 ### Usage
@@ -22,3 +22,5 @@ If you need a working data generation that is capable of generating synthetic da
 * [tcp communication](https://youtu.be/co7QoD9fjzU)
 
 ### Images
+![](./readme_images/0.png) 
+![](./readme_images/step0.front_cam.instancesegmentation_0.png)
