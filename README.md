@@ -15,3 +15,10 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 
 ### Note
 If you need a working data generation that is capable of generating synthetic data that works in the real world, please see the past repo that uses URP at [https://github.com/XingjianL/Robosub_Unity_Sim](https://github.com/XingjianL/Robosub_Unity_Sim)
+
+### Development Progress Videos
+* [multi-robot demo](https://www.youtube.com/watch?v=bfAbpL1laIY)
+* [force visualization](https://www.youtube.com/watch?v=ErsCroTt8VM)
+* [tcp communication](https://youtu.be/co7QoD9fjzU)
+
+### Images
