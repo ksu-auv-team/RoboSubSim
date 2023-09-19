@@ -6,63 +6,103 @@ using System.Threading;
 
 public class TCPServer : MonoBehaviour
 {
-    Thread thread;
     public string IPAddr = "127.0.0.1";
-    public int connectionPort = 25001;
-    TcpListener server;
-    TcpClient client;
-    NetworkStream nwStream;
-    bool running;
+    public int motorsPort = -1;
+    public int gyroPort = -1;
+    public int imageCommandsPort = -1;
+    //bool running;
+    public int msPerTransmit = 100;
 
+    private robot_imu imu_script;
+    private RobotForce motor_script;
+    private robot_camera camera_script;
 
+    private enum PortsID : int{
+        motors = 0,
+        gyro = 1,
+        commands = 2
+    }
+    private PortsID portsID; 
     void Start()
     {
+        motor_script = GetComponent<RobotForce>();
+        imu_script = GetComponent<robot_imu>();
+        camera_script = GetComponent<robot_camera>();
+
         // Receive on a separate thread so Unity doesn't freeze waiting for data
-        ThreadStart ts = new ThreadStart(GetData);
-        thread = new Thread(ts);
-        thread.Start();
+        //ThreadStart tsMotors = new ThreadStart(GetData);
+        Thread threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
+        threadMotors.Start();
+        //ThreadStart tsGyro = new ThreadStart(GetData);
+        Thread threadGyro = new Thread(() => GetData(gyroPort, PortsID.gyro));
+        threadGyro.Start();
+        //ThreadStart tsImages = new ThreadStart(GetData);
+        Thread threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
+        threadImages.Start();
     }
 
-    void GetData()
+    void GetData(int port, PortsID id)
     {
+        if (port < 0){
+            return;
+        }
+        
         // Create the server
-        server = new TcpListener(IPAddress.Parse(IPAddr), connectionPort);
+        TcpListener server = new TcpListener(IPAddress.Parse(IPAddr), port);
         server.Start();
-        print(1);
+        print("Port:" + port + ", started on " + IPAddr + ". waiting connection...");
         // Create a client to get the data stream
-        client = server.AcceptTcpClient();
-        nwStream = client.GetStream();
-        print(2);
+        TcpClient client = server.AcceptTcpClient();
+        NetworkStream nwStream = client.GetStream();
+        print("Port:"+port + ", stream connected");
         // Start listening
-        running = true;
+        bool running = true;
         while (running)
         {
-            Connection();
+            //print(id);
+            Connection(client, nwStream, id);
         }
         server.Stop();
     }
 
-    void Connection()
+    void Connection(TcpClient client, NetworkStream nwStream, PortsID id)
     {
-        // Read data from the network stream
-        byte[] buffer = new byte[client.ReceiveBufferSize];
-        int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+        switch (id) {
+            // receivers
+            case PortsID.motors:
+            case PortsID.commands:
+                // Read data from the network stream
+                byte[] buffer = new byte[client.ReceiveBufferSize];
+                int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
 
-        // Decode the bytes into a string
-        string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        //print(dataReceived);
-        // Make sure we're not getting an empty string
-        //dataReceived.Trim();
-        if (dataReceived != null && dataReceived != "")
-        {
-            // Convert the received string of data to the format we are using
-            position = ParseData(dataReceived);
-            nwStream.Write(buffer, 0, bytesRead);
+                // Decode the bytes into a string
+                string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                //print(dataReceived);
+                // Make sure we're not getting an empty string
+                dataReceived.Trim();
+                if (dataReceived != null && dataReceived != "")
+                {
+                    // Convert the received string of data to the format we are using
+                    ParseReceivedData(dataReceived, id);
+                    //nwStream.Write(buffer, 0, bytesRead);
+                }
+                break;
+            // senders
+            case PortsID.gyro:
+                Thread.Sleep(msPerTransmit);
+                ParseSendData(id);
+                break;
         }
     }
-
+    void ParseSendData(PortsID id){
+        switch (id) {
+            case PortsID.gyro:
+                Debug.Log(imu_script.imu.quaternion.eulerAngles);
+                break;
+        }
+    }
     // Use-case specific function, need to re-write this to interpret whatever data is being sent
-    public static Vector3 ParseData(string dataString)
+    void ParseReceivedData(string dataString, PortsID id)
     {
         Debug.Log(dataString);
         // Remove the parentheses
@@ -73,14 +113,19 @@ public class TCPServer : MonoBehaviour
 
         // Split the elements into an array
         string[] stringArray = dataString.Split(',');
-
-        // Store as a Vector3
-        Vector3 result = new Vector3(
-            float.Parse(stringArray[0]),
-            float.Parse(stringArray[1]),
-            float.Parse(stringArray[2]));
-        Debug.Log(result);
-        return result;
+        switch (id) {
+            case PortsID.motors:
+                motor_script.thrust_strengths[0] = float.Parse(stringArray[0]);
+                motor_script.thrust_strengths[1] = float.Parse(stringArray[1]);
+                motor_script.thrust_strengths[2] = float.Parse(stringArray[2]);
+                motor_script.thrust_strengths[3] = float.Parse(stringArray[3]);
+                motor_script.thrust_strengths[4] = float.Parse(stringArray[4]);
+                motor_script.thrust_strengths[5] = float.Parse(stringArray[5]);
+                motor_script.thrust_strengths[6] = float.Parse(stringArray[6]);
+                motor_script.thrust_strengths[7] = float.Parse(stringArray[7]);
+                break;
+        }
+        return;
     }
 
     // Position is the data being received in this example

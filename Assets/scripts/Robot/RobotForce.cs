@@ -7,12 +7,13 @@ public class RobotForce : MonoBehaviour
     public float strength = 2.36f;
     public float SubmergeDepth;
     public bool forceVisual = true;
+    public bool tcpControlled = false;
     public Material forceVisualMaterial;
     Rigidbody m_rigidBody;
     Vector3[] thruster_directions;
     const float KGF_TO_N = 9.80665f;
     const float MAX_FORCE = 2.36f*KGF_TO_N;
-
+    public float[] thrust_strengths = {0f,0f,0f,0f,0f,0f,0f,0f};
     float timer = 0;
     float random_thrust = 0;
     // Start is called before the first frame update
@@ -40,6 +41,17 @@ public class RobotForce : MonoBehaviour
             random_thrust = Random.Range(-1f,1f);
         }
         timer += Time.deltaTime;
+    }
+    // t1-8 from [-1,1] please
+    public void set_thrusts_strengths(){
+        add_thruster_force(0, thrust_strengths[0] * strength * KGF_TO_N);
+        add_thruster_force(1, thrust_strengths[1] * strength * KGF_TO_N);
+        add_thruster_force(2, thrust_strengths[2] * strength * KGF_TO_N);
+        add_thruster_force(3, thrust_strengths[3] * strength * KGF_TO_N);
+        add_thruster_force(4, thrust_strengths[4] * strength * KGF_TO_N);
+        add_thruster_force(5, thrust_strengths[5] * strength * KGF_TO_N);
+        add_thruster_force(6, thrust_strengths[6] * strength * KGF_TO_N);
+        add_thruster_force(7, thrust_strengths[7] * strength * KGF_TO_N);
     }
     void stop_thrust(){
         add_thruster_force(0, 0);
@@ -71,6 +83,7 @@ public class RobotForce : MonoBehaviour
         add_thruster_force(6, force );
         add_thruster_force(7, -force);
     }
+
     void add_thruster_force(int id, float force){
         if (force < 0) {
             force = force * 1.85f / 2.36f; // max forward/reverse spec sheet: https://www.thingbits.in/products/t100-thruster-no-esc
@@ -96,11 +109,16 @@ public class RobotForce : MonoBehaviour
     void FixedUpdate(){
         //print(transform.rotation.eulerAngles); // (roll,yaw,pitch)
         //SubmergeDepth = GetComponent<buoyancy_forces>().underwater;
-        if (transform.position.y <= SubmergeDepth) {
-            submerge(0);            
-            //spin(-strength * KGF_TO_N * random_thrust);
+        if (!tcpControlled){
+            if (transform.position.y <= SubmergeDepth) {
+                submerge(0);            
+                //spin(-strength * KGF_TO_N * random_thrust);
+            } else {
+                submerge(strength * KGF_TO_N);
+            }
         } else {
-            submerge(strength * KGF_TO_N);
+            set_thrusts_strengths();
+            //print(thrust_strengths);
         }
         //forward_force(strength * m_rigidBody.mass);
 
