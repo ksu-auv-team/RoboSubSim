@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 4
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 4718.429, g: 4136.53, b: 3988.817, a: 1}
+  m_IndirectSpecularColor: {r: 4817.39, g: 4326.5493, b: 4583.4497, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1113,6 +1113,11 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5149717260535381667, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 183
+      objectReference: {fileID: 0}
     - target: {fileID: 5469875554989288169, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalScale.z
@@ -1798,11 +1803,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d169406667a7449a5d6940174c9cca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IPAddr: 172.29.80.1
+  IPAddr: 172.23.240.1
   motorsPort: 1234
   gyroPort: 1235
   imageCommandsPort: 1236
-  msPerTransmit: 1000
+  msPerTransmit: 10
 --- !u!1 &1156674649
 GameObject:
   m_ObjectHideFlags: 0

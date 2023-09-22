@@ -31,7 +31,15 @@ public class robot_camera : MonoBehaviour
         Rendering = 2,
         Rendered = 3
     };
+    private enum CamCommandsID : int{
+        front_no_percept = 0,   // front RGB
+        down_no_percept = 1,    // down RGB
+        both_no_percept = 2,    // RGB for both
+        both_percept_only = 3,  // Segmentation for both
+        all = 4                 // all four
+    }
     private renderStatesEnum renderState;
+    private CamCommandsID currentCommand = CamCommandsID.all;
     private int currentFrames;
     void Start()
     {
@@ -68,13 +76,8 @@ public class robot_camera : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //CaptureAll();
-            renderState = renderStatesEnum.PreRender;
-            
+            renderState = renderStatesEnum.PreRender;            
         }
-        //Debug.Log(renderState);
-        //int cam_count = downCamera.allCameras.Length;
-        //Debug.Log(cam_count);
         switch (renderState){
             case renderStatesEnum.Off:
                 //MainCameraEnable();
@@ -84,7 +87,7 @@ public class robot_camera : MonoBehaviour
                     currentFrames = 0;
                     renderState = renderStatesEnum.Rendering;
                 }
-                RenderCameraEnable();
+                CommandEnable();
                 currentFrames += 1;
                 break;
             case renderStatesEnum.Rendering:
@@ -95,43 +98,77 @@ public class robot_camera : MonoBehaviour
                 currentFrames += 1;
                 break;
             case renderStatesEnum.Rendered:
-                CaptureAll();
-                RenderCameraDisable();
+                CommandCapture();
+                CommandDisable();
                 currentFrames = 0;
                 renderState = renderStatesEnum.Off;
                 break;
         }
         
     }
-    private void RenderCameraDisable(){
+    public void CommandTrigger(int command){
+        currentCommand = (CamCommandsID)command;
+        renderState = renderStatesEnum.PreRender;
+    }
+    private void CommandDisable(){
         frontCamera.enabled = false;
         downCamera.enabled = false;
         #if (WINDOWS)
         frontPerceptionCamera.enabled = false; // idk why ubuntu has fps issue with this, might be Vulkan stuff
         downPerceptionCamera.enabled = false;
         #endif
-        //frontPerceptionCameraScript.enabled = false;
-        //downPerceptionCameraScript.enabled = false;
-        mainCamera.enabled = true;
-        //mainCamera.depth = Camera.main.depth + 1;
-        //Debug.Log("Depth" + Camera.main.depth + " " + mainCamera.depth);
-    }
-    private void RenderCameraEnable(){
-        frontCamera.enabled = true;
-        downCamera.enabled = true;
-        //frontPerceptionCameraScript.enabled = true;
-        //downPerceptionCameraScript.enabled = true;
-        frontPerceptionCamera.enabled = true;
-        downPerceptionCamera.enabled = true;
-        
         mainCamera.enabled = true;
     }
-    private void CaptureAll(){
-        frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
-        downCounter = Capture(downCamera, downCamSavePath, downCounter);
-        frontPerceptionCameraScript.RequestCapture();
-        downPerceptionCameraScript.RequestCapture();
+    private void CommandEnable(){
+        mainCamera.enabled = true;
+        switch (currentCommand){
+            case CamCommandsID.front_no_percept:
+                frontCamera.enabled = true;
+                break;
+            case CamCommandsID.down_no_percept:
+                downCamera.enabled = true;
+                break;
+            case CamCommandsID.both_no_percept:
+                frontCamera.enabled = true;
+                downCamera.enabled = true;
+                break;
+            case CamCommandsID.both_percept_only:
+                frontPerceptionCamera.enabled = true;
+                downPerceptionCamera.enabled = true;
+                break;
+            case CamCommandsID.all:
+                frontCamera.enabled = true;
+                downCamera.enabled = true;
+                frontPerceptionCamera.enabled = true;
+                downPerceptionCamera.enabled = true;
+                break;
+        }
     }
+    private void CommandCapture(){
+        switch (currentCommand) {
+            case CamCommandsID.front_no_percept:
+                frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
+                break;
+            case CamCommandsID.down_no_percept:
+                downCounter = Capture(downCamera, downCamSavePath, downCounter);
+                break;
+            case CamCommandsID.both_no_percept:
+                frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
+                downCounter = Capture(downCamera, downCamSavePath, downCounter);
+                break;
+            case CamCommandsID.both_percept_only:
+                frontPerceptionCameraScript.RequestCapture();
+                downPerceptionCameraScript.RequestCapture();
+                break;
+            case CamCommandsID.all:
+                frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
+                downCounter = Capture(downCamera, downCamSavePath, downCounter);
+                frontPerceptionCameraScript.RequestCapture();
+                downPerceptionCameraScript.RequestCapture();
+                break;
+        }
+    }
+    
     private int Capture(Camera cam, string save_path, int id){
         RenderTexture activeRT = RenderTexture.active;
         Texture2D image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
