@@ -19,7 +19,8 @@ If you need a working data generation that is capable of generating synthetic da
 ### Development Progress Videos
 * [multi-robot demo](https://www.youtube.com/watch?v=bfAbpL1laIY)
 * [force visualization](https://www.youtube.com/watch?v=ErsCroTt8VM)
-* [tcp communication](https://youtu.be/co7QoD9fjzU)
+* [tcp communication 1](https://youtu.be/co7QoD9fjzU)
+* [tcp communication 2](https://youtu.be/8Z5JBNiAVlg)
 
 ### Images
 ![](./readme_images/0.png) 
