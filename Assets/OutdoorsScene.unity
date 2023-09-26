@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 4718.429, g: 4136.53, b: 3988.817, a: 1}
+  m_IndirectSpecularColor: {r: 4718.4565, g: 4136.3657, b: 3988.8755, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1031,7 +1031,7 @@ PrefabInstance:
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.376
+      value: -1.083
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -1367,6 +1367,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 870155845}
+  - component: {fileID: 870155848}
   - component: {fileID: 870155847}
   m_Layer: 0
   m_Name: Pool
@@ -1422,10 +1423,10 @@ MonoBehaviour:
   endSmoothness: 0
   smoothnessFadeStart: 100
   smoothnessFadeDistance: 500
-  refractionColor: {r: 0.5149178, g: 0.45641106, b: 0.40197787, a: 1}
+  refractionColor: {r: 0.45641106, g: 0.5149178, b: 0.5143361, a: 1}
   maxRefractionDistance: 3.5
   absorptionDistance: 7
-  scatteringColor: {r: 0.15292616, g: 0.2831488, b: 0.18116423, a: 1}
+  scatteringColor: {r: 0.04518618, g: 0.08021983, b: 0.18782076, a: 1}
   ambientScattering: 0
   heightScattering: 1
   displacementScattering: 0.97
@@ -1550,6 +1551,19 @@ MonoBehaviour:
   waterMaskRemap: {x: 0, y: 1}
   waterMaskExtent: {x: 120.00001, y: 90.00002}
   waterMaskOffset: {x: 0, y: 0}
+--- !u!114 &870155848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 870155844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9d2aab955ba354ba366dcd68b02759, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waterscript: {fileID: 870155847}
 --- !u!1 &935331724 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6518905090109130357, guid: b74ea355523470b4c968ffdd0a45ed84,
@@ -2818,7 +2832,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.20392159, g: 0.40784317, b: 0.2627451, a: 0.49803922}
+      maxColor: {r: 0.20392159, g: 0.40784317, b: 0.3254902, a: 0.44705883}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
