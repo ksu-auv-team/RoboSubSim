@@ -3,7 +3,7 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 
 ### Targets
 * Photorealism (HDRP Water, Domain Randomizations, Successful Sim2Real Transfer)
-* Robot Simulation (Fake robot that emulate real robot, ie. is controlled by the same code and has the same sort of interaction with the environment)
+* Robot Simulation (Fake robot that emulates real robot, ie. is controlled by the same code and has the same sort of interaction with the environment)
 * Conveniences (Auto labeled bounding boxes, segmentation/depth imaging, data generation, maybe even RL)
 
 ### Usage
@@ -15,3 +15,13 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 
 ### Note
 If you need a working data generation that is capable of generating synthetic data that works in the real world, please see the past repo that uses URP at [https://github.com/XingjianL/Robosub_Unity_Sim](https://github.com/XingjianL/Robosub_Unity_Sim)
+
+### Development Progress Videos
+* [multi-robot demo](https://www.youtube.com/watch?v=bfAbpL1laIY)
+* [force visualization](https://www.youtube.com/watch?v=ErsCroTt8VM)
+* [tcp communication 1](https://youtu.be/co7QoD9fjzU)
+* [tcp communication 2](https://youtu.be/8Z5JBNiAVlg)
+
+### Images
+![](./readme_images/0.png) 
+![](./readme_images/step0.front_cam.instancesegmentation_0.png)

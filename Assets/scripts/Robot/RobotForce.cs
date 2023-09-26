@@ -91,6 +91,9 @@ public class RobotForce : MonoBehaviour
         if (force > MAX_FORCE) {
             force = MAX_FORCE;
         }
+        if (force < -MAX_FORCE * 1.85f/2.36f) {
+            force = -MAX_FORCE * 1.85f/2.36f;
+        }
         m_rigidBody.AddForceAtPosition(force * thrusters[id].transform.forward, thrusters[id].transform.position);
         if (forceVisual) {
             Transform force_visual = thrusters[id].transform.Find("force_visual");

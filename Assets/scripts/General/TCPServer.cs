@@ -22,6 +22,9 @@ public class TCPServer : MonoBehaviour
         gyro = 1,
         commands = 2
     }
+    private Thread threadMotors;
+    private Thread threadGyro;
+    private Thread threadImages;
     private PortsID portsID; 
     void Start()
     {
@@ -31,16 +34,20 @@ public class TCPServer : MonoBehaviour
 
         // Receive on a separate thread so Unity doesn't freeze waiting for data
         //ThreadStart tsMotors = new ThreadStart(GetData);
-        Thread threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
+        threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
         threadMotors.Start();
         //ThreadStart tsGyro = new ThreadStart(GetData);
-        Thread threadGyro = new Thread(() => GetData(gyroPort, PortsID.gyro));
+        threadGyro = new Thread(() => GetData(gyroPort, PortsID.gyro));
         threadGyro.Start();
         //ThreadStart tsImages = new ThreadStart(GetData);
-        Thread threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
+        threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
         threadImages.Start();
     }
-
+    void OnDestroy(){
+        threadMotors.Abort();
+        threadGyro.Abort();
+        threadImages.Abort();
+    }
     void GetData(int port, PortsID id)
     {
         if (port < 0){
@@ -59,13 +66,12 @@ public class TCPServer : MonoBehaviour
         bool running = true;
         while (running)
         {
-            //print(id);
-            Connection(client, nwStream, id);
+            running = Connection(client, nwStream, id);
         }
         server.Stop();
     }
 
-    void Connection(TcpClient client, NetworkStream nwStream, PortsID id)
+    bool Connection(TcpClient client, NetworkStream nwStream, PortsID id)
     {
         switch (id) {
             // receivers
@@ -87,17 +93,27 @@ public class TCPServer : MonoBehaviour
                     //nwStream.Write(buffer, 0, bytesRead);
                 }
                 break;
-            // senders
+            // transmitters
             case PortsID.gyro:
                 Thread.Sleep(msPerTransmit);
-                ParseSendData(id);
+                ParseSendData(id, nwStream);
                 break;
         }
+        return true;
     }
-    void ParseSendData(PortsID id){
+    void ParseSendData(PortsID id, NetworkStream nwStream){
         switch (id) {
             case PortsID.gyro:
-                Debug.Log(imu_script.imu.quaternion.eulerAngles);
+                byte[] gyro_buf = new byte[12];
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                        imu_script.imu.quaternion.eulerAngles.x), 0, gyro_buf, 0, 4);
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                        imu_script.imu.quaternion.eulerAngles.y), 0, gyro_buf, 4, 4);
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                        imu_script.imu.quaternion.eulerAngles.z), 0, gyro_buf, 8, 4);
+                nwStream.Write(gyro_buf,0,gyro_buf.Length);
+                //Debug.Log(imu_script.imu.quaternion.eulerAngles);
+                //Debug.Log(System.BitConverter.IsLittleEndian);
                 break;
         }
     }
@@ -124,16 +140,19 @@ public class TCPServer : MonoBehaviour
                 motor_script.thrust_strengths[6] = float.Parse(stringArray[6]);
                 motor_script.thrust_strengths[7] = float.Parse(stringArray[7]);
                 break;
+            case PortsID.commands:
+                int command = int.Parse(stringArray[0]);
+                camera_script.CommandTrigger(command);
+                break;
         }
         return;
     }
 
     // Position is the data being received in this example
-    Vector3 position = Vector3.zero;
-
-    void Update()
-    {
-        // Set this object's position in the scene according to the position received
-        //transform.position = position;
-    }
+    //Vector3 position = Vector3.zero;
+    //void Update()
+    //{
+    //    // Set this object's position in the scene according to the position received
+    //    //transform.position = position;
+    //}
 }
