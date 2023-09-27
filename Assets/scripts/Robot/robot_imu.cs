@@ -65,8 +65,11 @@ public class robot_imu : MonoBehaviour
     }
     void FixedUpdate(){
         imu.quaternion = transform.rotation;
-        imu.linearAccel = (rigidbody.velocity - imu.linearVel)/Time.fixedDeltaTime;
+        // v1 = v0 + acc * dt
+        // acc = (v1 - v0) / dt
+        imu.linearAccel = (rigidbody.velocity - imu.linearVel)/Time.fixedDeltaTime; 
         imu.linearVel = rigidbody.velocity;
+        
         imu.applyAccelNoise();
         imu.applyGyroNoise();
         imu.elapsedTime += Time.fixedDeltaTime;
