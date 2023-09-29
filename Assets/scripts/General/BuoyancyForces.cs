@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class buoyancy_forces : MonoBehaviour
+public class BuoyancyForces : MonoBehaviour
 {
     public float waterHeight = 0f;
     public float waterDensity = 1.025f; // kg/L

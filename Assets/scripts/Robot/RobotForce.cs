@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 public class RobotForce : MonoBehaviour
 {
+    private RobotIMU imu_script;
     public GameObject[] thrusters;
     public float strength = 2.36f;
     public float SubmergeDepth;
     public bool forceVisual = true;
-    public bool tcpControlled = false;
+    [HideInInspector] public bool tcpControlled = false;
     public Material forceVisualMaterial;
     Rigidbody m_rigidBody;
     Vector3[] thruster_directions;
@@ -22,6 +23,7 @@ public class RobotForce : MonoBehaviour
     float random_thrust = 0;
     public enum controlMode : int {
         motors = 0,
+        RAW = 0,
         bodyForce = 1,
         bodyVelocityFixedHeading = 2
 
@@ -94,7 +96,8 @@ public class RobotForce : MonoBehaviour
         transform.position = new Vector3(other_control[0], other_control[2], -other_control[1]);
     }
     void set_body_rotation(){
-        transform.rotation = Quaternion.Euler(new Vector3(-other_control[4], -other_control[5], other_control[3]));
+        transform.rotation = Quaternion.Euler(new Vector3(-other_control[4], -other_control[5], other_control[3]))
+                            * imu_script.imu.accumulatedGyroDrift;
     }
     void stop_thrust(){
         add_thruster_force(0, 0);

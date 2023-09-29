@@ -13,9 +13,9 @@ public class TCPServer : MonoBehaviour
     //bool running;
     public int msPerTransmit = 100;
 
-    private robot_imu imu_script;
+    private RobotIMU imu_script;
     private RobotForce motor_script;
-    private robot_camera camera_script;
+    private RobotCamera camera_script;
 
     private enum PortsID : int{
         motors = 0,
@@ -29,8 +29,8 @@ public class TCPServer : MonoBehaviour
     void Start()
     {
         motor_script = GetComponent<RobotForce>();
-        imu_script = GetComponent<robot_imu>();
-        camera_script = GetComponent<robot_camera>();
+        imu_script = GetComponent<RobotIMU>();
+        camera_script = GetComponent<RobotCamera>();
 
         // Receive on a separate thread so Unity doesn't freeze waiting for data
         //ThreadStart tsMotors = new ThreadStart(GetData);
@@ -53,7 +53,13 @@ public class TCPServer : MonoBehaviour
         if (port < 0){
             return;
         }
-        
+        // Use TCP control because potentially valid port, configure scripts
+        switch (id) {
+            case PortsID.motors:
+                // change the source of robot control from Unity to TCP
+                motor_script.tcpControlled = true;
+                break;
+        }
         // Create the server
         TcpListener server = new TcpListener(IPAddress.Parse(IPAddr), port);
         server.Start();

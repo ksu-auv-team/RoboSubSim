@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Perception.GroundTruth;
-public class robot_camera : MonoBehaviour
+public class RobotCamera : MonoBehaviour
 {
     // Start is called before the first frame update
     public Camera mainCamera;
@@ -221,12 +221,8 @@ public class robot_camera : MonoBehaviour
     //private void Capture(){
     //    Front_Capture();
     //    Down_Capture();
-    //}
-    private float rotation_gui = 180f;
-    
+    //}    
     void OnGUI(){
-        //GUIUtility.RotateAroundPivot(rotation_gui, new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
-        //GUIUtility.ScaleAroundPivot(new Vector2(1, -1), new Vector2(mainCamera.pixelWidth/2, mainCamera.pixelHeight/2));
         var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
         if (GUI.Button(button_rect, "Space to capture, fps:" + (int)(1.0f / Time.smoothDeltaTime))){
             renderState = renderStatesEnum.PreRender;
