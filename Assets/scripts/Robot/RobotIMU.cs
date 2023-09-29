@@ -29,7 +29,7 @@ public struct IMU{
                                             Random.Range(-this.accelNoise, this.accelNoise),
                                             Random.Range(-this.accelNoise, this.accelNoise));
             this.accumulatedAccelDrift = new Vector3(accelNoiseDrift, accelNoiseDrift, accelNoiseDrift)
-                                                        * Random.Range(0.8f, 1.2f) * elapsedTime;
+                                                        * Random.Range(0.95f, 1.05f) * elapsedTime;
             this.linearAccel += this.accumulatedAccelDrift;
             //this.linearAccel += new Vector3(accelNoiseDrift, accelNoiseDrift, accelNoiseDrift)
             //                    * Random.Range(0.8f, 1.2f) * elapsedTime;
@@ -39,7 +39,7 @@ public struct IMU{
                                                             Random.Range(-this.gyroNoise, this.gyroNoise),
                                                             Random.Range(-this.gyroNoise, this.gyroNoise)));
             this.accumulatedGyroDrift = Quaternion.Euler(new Vector3(gyroNoiseDrift, gyroNoiseDrift, gyroNoiseDrift)
-                                                            * Random.Range(0.8f, 1.2f) * elapsedTime);
+                                                            * Random.Range(0.95f, 1.05f) * elapsedTime);
             this.quaternion *= this.accumulatedGyroDrift;
             //this.quaternion *= Quaternion.Euler(new Vector3(gyroNoiseDrift, gyroNoiseDrift, gyroNoiseDrift)
             //                                                * Random.Range(0.8f, 1.2f) * elapsedTime);
@@ -64,7 +64,7 @@ public class RobotIMU : MonoBehaviour
     {
         imu = new IMU(accelNoise * Mathf.Abs(Physics.gravity.y) * .000001f * Mathf.Sqrt(1/Time.fixedDeltaTime),
                     accelNoiseDrift * Mathf.Abs(Physics.gravity.y) * .000001f * Mathf.Sqrt(1/Time.fixedDeltaTime),
-                    gyroNoise, gyroNoise);
+                    gyroNoise, gyroNoiseDrift);
         m_rigidbody = this.GetComponent<Rigidbody>();
     }
 

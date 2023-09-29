@@ -31,7 +31,9 @@ public class BuoyancyForces : MonoBehaviour
     }
 
     void FixedUpdate(){
-        //print(m_Rigidbody.centerOfMass);
+        // TODO: scale buoyancy force with partial underwater 
+        //      by adjusting volumeDisplaced when part of the body is above surface
+        //      
         float difference = transform.position.y + m_Rigidbody.centerOfMass.y - waterHeight;
         float buoyancy_force = 0;
         if (difference < 0){
@@ -46,11 +48,11 @@ public class BuoyancyForces : MonoBehaviour
             m_Rigidbody.AddForce(new Vector3(0, -buoyancy_force, 0));
         }
         if (forceVisual){
-            float environment_force_diff = (-buoyancy_force + m_Rigidbody.mass * Physics.gravity.y)/Mathf.Abs(Physics.gravity.y);
+            float environment_force_diff = (-buoyancy_force + m_Rigidbody.mass * Physics.gravity.y)/Mathf.Abs(m_Rigidbody.mass * Physics.gravity.y);
             //print(environment_force_diff);
             var force_visual = transform.Find("env_force_visual");
             if (force_visual != null){
-                force_visual.localScale = new Vector3(environment_force_diff/10,environment_force_diff/10,environment_force_diff/2);
+                force_visual.localScale = new Vector3(environment_force_diff/5,environment_force_diff/5,environment_force_diff);
             }
         }
     }

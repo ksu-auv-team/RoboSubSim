@@ -19,7 +19,7 @@ public class TCPServer : MonoBehaviour
 
     private enum PortsID : int{
         motors = 0,
-        gyro = 1,
+        imu = 1,
         commands = 2
     }
     private Thread threadMotors;
@@ -37,7 +37,7 @@ public class TCPServer : MonoBehaviour
         threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
         threadMotors.Start();
         //ThreadStart tsGyro = new ThreadStart(GetData);
-        threadGyro = new Thread(() => GetData(gyroPort, PortsID.gyro));
+        threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
         threadGyro.Start();
         //ThreadStart tsImages = new ThreadStart(GetData);
         threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
@@ -100,7 +100,7 @@ public class TCPServer : MonoBehaviour
                 }
                 break;
             // transmitters
-            case PortsID.gyro:
+            case PortsID.imu:
                 Thread.Sleep(msPerTransmit);
                 ParseSendData(id, nwStream);
                 break;
@@ -109,15 +109,21 @@ public class TCPServer : MonoBehaviour
     }
     void ParseSendData(PortsID id, NetworkStream nwStream){
         switch (id) {
-            case PortsID.gyro:
-                byte[] gyro_buf = new byte[12];
+            case PortsID.imu:
+                byte[] imu_buf = new byte[24];
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu_script.imu.quaternion.eulerAngles.x), 0, gyro_buf, 0, 4);
+                                        imu_script.imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu_script.imu.quaternion.eulerAngles.y), 0, gyro_buf, 4, 4);
+                                        -imu_script.imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu_script.imu.quaternion.eulerAngles.z), 0, gyro_buf, 8, 4);
-                nwStream.Write(gyro_buf,0,gyro_buf.Length);
+                                        -imu_script.imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                        -imu_script.imu.linearAccel.z), 0, imu_buf, 12, 4);
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                        imu_script.imu.linearAccel.x), 0, imu_buf, 16, 4);
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                        imu_script.imu.linearAccel.y), 0, imu_buf, 20, 4);
+                nwStream.Write(imu_buf,0,imu_buf.Length);
                 //Debug.Log(imu_script.imu.quaternion.eulerAngles);
                 //Debug.Log(System.BitConverter.IsLittleEndian);
                 break;

@@ -22,16 +22,20 @@ public class RobotForce : MonoBehaviour
     float timer = 0;
     float random_thrust = 0;
     public enum controlMode : int {
+        Raw = 0,
+        Local = 1,
+        Global = 2,
         motors = 0,
-        RAW = 0,
+        
         bodyForce = 1,
-        bodyVelocityFixedHeading = 2
+        bodyVelocityFixedHeading = 3
 
     }
     public controlMode controlMethod = controlMode.motors;
     // Start is called before the first frame update
     void Start()
     {
+        imu_script = GetComponent<RobotIMU>();
         m_rigidBody = GetComponent<Rigidbody>();
         if (forceVisualMaterial != null){
             foreach (var thruster in thrusters) {
@@ -73,6 +77,7 @@ public class RobotForce : MonoBehaviour
         m_rigidBody.AddForce(transform.right    * front_force); // go forward
         m_rigidBody.AddForce(-transform.forward * side_force); // go right
         m_rigidBody.AddForce(transform.up       * up_force); // go up
+        print(up_force);
     }
     private void set_body_torque(){
         var x_torque = 4*.2f*limit_thruster_force(other_control[3] * strength * KGF_TO_N);
@@ -96,6 +101,7 @@ public class RobotForce : MonoBehaviour
         transform.position = new Vector3(other_control[0], other_control[2], -other_control[1]);
     }
     void set_body_rotation(){
+        //print(imu_script.imu.accumulatedGyroDrift.eulerAngles);
         transform.rotation = Quaternion.Euler(new Vector3(-other_control[4], -other_control[5], other_control[3]))
                             * imu_script.imu.accumulatedGyroDrift;
     }
@@ -178,16 +184,19 @@ public class RobotForce : MonoBehaviour
             }
         } else {
             switch (controlMethod) {
-                case controlMode.motors:
+                case controlMode.motors:    // Raw
                     set_thrusts_strengths();
                     break;
-                case controlMode.bodyForce:
+                case controlMode.bodyForce: // local
                     set_body_force();
                     set_body_torque();
                     break;
                 case controlMode.bodyVelocityFixedHeading:
                     set_body_velocity();
                     set_body_rotation();
+                    break;
+                case controlMode.Global:
+                    print("Global mode not implemented yet");
                     break;
             }
             //print(thrust_strengths);
