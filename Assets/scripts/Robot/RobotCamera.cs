@@ -43,6 +43,10 @@ public class RobotCamera : MonoBehaviour
     private int currentFrames;
     void Start()
     {
+        if (SystemInfo.graphicsDeviceID == 0) {
+            print("Running in Server Mode, Cannot Render Images");
+            return;
+        }
         //mainCamera = Camera.main;
         //mainCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         //mainCamera.targetDisplay = 1;
@@ -74,6 +78,10 @@ public class RobotCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (SystemInfo.graphicsDeviceID == 0) {
+            
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.Space))
         {
             renderState = renderStatesEnum.PreRender;            
@@ -113,7 +121,7 @@ public class RobotCamera : MonoBehaviour
     private void CommandDisable(){
         frontCamera.enabled = false;
         downCamera.enabled = false;
-        #if (WINDOWS)
+        #if WINDOWS
         frontPerceptionCamera.enabled = false; // idk why ubuntu has fps issue with this, might be Vulkan stuff
         downPerceptionCamera.enabled = false;
         #endif
@@ -156,13 +164,19 @@ public class RobotCamera : MonoBehaviour
                 frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
                 downCounter = Capture(downCamera, downCamSavePath, downCounter);
                 break;
-            case CamCommandsID.both_percept_only:
-                frontPerceptionCameraScript.RequestCapture();
-                downPerceptionCameraScript.RequestCapture();
-                break;
+            
             case CamCommandsID.all:
                 frontCounter = Capture(frontCamera, frontCamSavePath, frontCounter);
                 downCounter = Capture(downCamera, downCamSavePath, downCounter);
+                goto case CamCommandsID.both_percept_only;
+                //frontPerceptionCameraScript.RequestCapture();
+                //downPerceptionCameraScript.RequestCapture();
+                //break;
+            case CamCommandsID.both_percept_only:
+                #if (UNITY_STANDALONE_LINUX)
+                    print("There is some sort of bug with perception package in Linux Compiled, use editor in linux");
+                    break;
+                #endif
                 frontPerceptionCameraScript.RequestCapture();
                 downPerceptionCameraScript.RequestCapture();
                 break;

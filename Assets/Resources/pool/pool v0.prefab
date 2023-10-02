@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7958355368142471172}
   - component: {fileID: 9211047557220944437}
   - component: {fileID: 1829506540814033161}
+  - component: {fileID: 5688675080330392184}
   - component: {fileID: 2973680579123115588}
   m_Layer: 0
   m_Name: waterbody
@@ -86,6 +87,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5688675080330392184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4359803864055753583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52bf72f20a6b8bf43ad5db9adabb3bed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waterColor: {fileID: 0}
 --- !u!65 &2973680579123115588
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -116,8 +130,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8529662939443008921}
-  - component: {fileID: 7572871615336955953}
   - component: {fileID: 866070171036112511}
+  - component: {fileID: 7572871615336955953}
   m_Layer: 0
   m_Name: Pool
   m_TagString: Untagged
@@ -140,19 +154,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7958355368142471172}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!114 &7572871615336955953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5102322436314122177}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae9d2aab955ba354ba366dcd68b02759, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waterScript: {fileID: 866070171036112511}
 --- !u!114 &866070171036112511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,6 +314,19 @@ MonoBehaviour:
   waterMaskRemap: {x: 0, y: 1}
   waterMaskExtent: {x: 120.00001, y: 90.00002}
   waterMaskOffset: {x: 0, y: 0}
+--- !u!114 &7572871615336955953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5102322436314122177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9d2aab955ba354ba366dcd68b02759, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waterScript: {fileID: 866070171036112511}
 --- !u!1 &8606220386771760332
 GameObject:
   m_ObjectHideFlags: 0

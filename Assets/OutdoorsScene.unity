@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 4
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 4817.406, g: 4326.5493, b: 4583.473, a: 1}
+  m_IndirectSpecularColor: {r: 4817.3354, g: 4326.557, b: 4583.473, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -182,10 +182,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2973680579123115588, guid: b70c9d58957517d41bf4a01521bd7e9f,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3954148739671064663, guid: b70c9d58957517d41bf4a01521bd7e9f,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7572871615336955953, guid: b70c9d58957517d41bf4a01521bd7e9f,
         type: 3}
@@ -414,6 +419,12 @@ MonoBehaviour:
   m_PointlightHDType: 0
   m_SpotLightShape: 0
   m_AreaLightShape: 0
+--- !u!20 &424002539 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6146853144427460279, guid: b74ea355523470b4c968ffdd0a45ed84,
+    type: 3}
+  m_PrefabInstance: {fileID: 1855465547}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &432432459
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,7 +790,7 @@ MonoBehaviour:
   customPasses:
   - rid: 7943112262378323968
   injectionPoint: 3
-  m_TargetCamera: {fileID: 0}
+  m_TargetCamera: {fileID: 1873760809}
   useTargetCamera: 1
   references:
     version: 2
@@ -837,7 +848,7 @@ MonoBehaviour:
   customPasses:
   - rid: 7943112262378323970
   injectionPoint: 3
-  m_TargetCamera: {fileID: 0}
+  m_TargetCamera: {fileID: 424002539}
   useTargetCamera: 1
   references:
     version: 2
@@ -875,10 +886,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: cube_wolf
       objectReference: {fileID: 0}
+    - target: {fileID: 1196306731892029154, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: m_TagString
+      value: WaterColorDependent
+      objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 15.243
+      value: 15.3102665
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -888,27 +904,27 @@ PrefabInstance:
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -15.865
+      value: -16.540512
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.22391596
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 0.9746085
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -918,7 +934,7 @@ PrefabInstance:
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 154.122
       objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -943,7 +959,7 @@ PrefabInstance:
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: controlMethod
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -953,12 +969,12 @@ PrefabInstance:
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: 'other_control.Array.data[1]'
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: 'other_control.Array.data[2]'
-      value: -0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -987,6 +1003,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7288635819623214197, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
+      propertyPath: port
+      value: 1234
+      objectReference: {fileID: 0}
+    - target: {fileID: 7288635819623214197, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
       propertyPath: msPerTransmit
       value: 20
       objectReference: {fileID: 0}
@@ -1005,6 +1026,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b74ea355523470b4c968ffdd0a45ed84, type: 3}
+--- !u!20 &1873760809 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 5149717260535381667, guid: b74ea355523470b4c968ffdd0a45ed84,
+    type: 3}
+  m_PrefabInstance: {fileID: 1855465547}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2013410473
 GameObject:
   m_ObjectHideFlags: 1

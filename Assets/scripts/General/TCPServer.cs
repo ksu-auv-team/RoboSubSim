@@ -7,9 +7,11 @@ using System.Threading;
 public class TCPServer : MonoBehaviour
 {
     public string IPAddr = "127.0.0.1";
+    public int port = -1;
     public int motorsPort = -1;
     public int gyroPort = -1;
     public int imageCommandsPort = -1;
+    public bool general = true;
     //bool running;
     public int msPerTransmit = 100;
 
@@ -18,13 +20,15 @@ public class TCPServer : MonoBehaviour
     private RobotCamera camera_script;
 
     private enum PortsID : int{
-        motors = 0,
-        imu = 1,
-        commands = 2
+        general = 0,
+        motors = 1,
+        imu = 2,
+        commands = 3,
     }
     private Thread threadMotors;
     private Thread threadGyro;
     private Thread threadImages;
+    private Thread threadGeneral;
     private PortsID portsID; 
     void Start()
     {
@@ -33,15 +37,21 @@ public class TCPServer : MonoBehaviour
         camera_script = GetComponent<RobotCamera>();
 
         // Receive on a separate thread so Unity doesn't freeze waiting for data
-        //ThreadStart tsMotors = new ThreadStart(GetData);
-        threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
-        threadMotors.Start();
-        //ThreadStart tsGyro = new ThreadStart(GetData);
-        threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
-        threadGyro.Start();
-        //ThreadStart tsImages = new ThreadStart(GetData);
-        threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
-        threadImages.Start();
+        if (general) {
+            threadGeneral = new Thread(() => GetData(port, PortsID.general));
+            threadGeneral.Start();
+        } else {
+            //ThreadStart tsMotors = new ThreadStart(GetData);
+            threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
+            threadMotors.Start();
+            //ThreadStart tsGyro = new ThreadStart(GetData);
+            threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
+            threadGyro.Start();
+            //ThreadStart tsImages = new ThreadStart(GetData);
+            threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
+            threadImages.Start();
+        }
+        
     }
     void OnDestroy(){
         threadMotors.Abort();
@@ -55,11 +65,13 @@ public class TCPServer : MonoBehaviour
         }
         // Use TCP control because potentially valid port, configure scripts
         switch (id) {
+            case PortsID.general:
             case PortsID.motors:
                 // change the source of robot control from Unity to TCP
                 motor_script.tcpControlled = true;
                 break;
         }
+        print("Thread created");
         // Create the server
         TcpListener server = new TcpListener(IPAddress.Parse(IPAddr), port);
         server.Start();
@@ -81,6 +93,9 @@ public class TCPServer : MonoBehaviour
     {
         switch (id) {
             // receivers
+            case PortsID.general:
+                ParseSendData(id, nwStream);
+                goto case PortsID.motors;
             case PortsID.motors:
             case PortsID.commands:
                 // Read data from the network stream
@@ -104,13 +119,19 @@ public class TCPServer : MonoBehaviour
                 Thread.Sleep(msPerTransmit);
                 ParseSendData(id, nwStream);
                 break;
+            
         }
         return true;
     }
     void ParseSendData(PortsID id, NetworkStream nwStream){
+        byte[] imu_buf = new byte[24];
         switch (id) {
+            case PortsID.general:
+                // attach 'I' to the end of imu buffer
+                imu_buf = new byte[26];
+                System.Buffer.BlockCopy(System.BitConverter.GetBytes('I'), 0, imu_buf, 24, 2);
+                goto case PortsID.imu;
             case PortsID.imu:
-                byte[] imu_buf = new byte[24];
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                         imu_script.imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
@@ -142,6 +163,19 @@ public class TCPServer : MonoBehaviour
         // Split the elements into an array
         string[] stringArray = dataString.Split(',');
         switch (id) {
+            case PortsID.general:
+                var endVal = char.Parse(stringArray[stringArray.Length-1]);
+                print(endVal);
+                if (endVal == 'R') {    // raw (individual motors)
+                    goto case PortsID.motors;
+                }
+                if (endVal == 'C') {    // command
+                    goto case PortsID.commands;
+                }
+                if (endVal == 'L') {    // local
+
+                }
+                break;
             case PortsID.motors:
                 motor_script.thrust_strengths[0] = float.Parse(stringArray[0]);
                 motor_script.thrust_strengths[1] = float.Parse(stringArray[1]);

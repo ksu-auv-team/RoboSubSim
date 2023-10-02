@@ -93,7 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2128896902703280934}
   m_Layer: 0
-  m_Name: thruster_2
+  m_Name: thruster_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -108,7 +108,7 @@ Transform:
   m_GameObject: {fileID: 1182077728615828581}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.0675, y: -0.05, z: 0.275}
+  m_LocalPosition: {x: -0.117, y: -0.03, z: 0.396}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -155,11 +155,11 @@ Transform:
   - {fileID: 5541020254875843452}
   - {fileID: 2795035323793287115}
   - {fileID: 6061109813799297149}
-  - {fileID: 2128896902703280934}
   - {fileID: 7958291621658368133}
+  - {fileID: 2128896902703280934}
   - {fileID: 1524594106842310081}
-  - {fileID: 562973613512774975}
   - {fileID: 940374391908488269}
+  - {fileID: 562973613512774975}
   - {fileID: 1099353876688747496}
   - {fileID: 1320993440629130132}
   - {fileID: 2660809542047823648}
@@ -178,7 +178,7 @@ Rigidbody:
   m_Mass: 32
   m_Drag: 2
   m_AngularDrag: 2
-  m_CenterOfMass: {x: 0, y: -0.05, z: 0}
+  m_CenterOfMass: {x: 0, y: -0.03, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
@@ -263,14 +263,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   thrusters:
-  - {fileID: 5563994834262912885}
-  - {fileID: 1182077728615828581}
-  - {fileID: 6518905090109130357}
-  - {fileID: 8633875539015730965}
+  - {fileID: 3865729731038652347}
+  - {fileID: 6927611447158964003}
   - {fileID: 6986253656605163352}
   - {fileID: 6010349454698828620}
-  - {fileID: 6927611447158964003}
-  - {fileID: 3865729731038652347}
+  - {fileID: 8633875539015730965}
+  - {fileID: 1182077728615828581}
+  - {fileID: 6518905090109130357}
+  - {fileID: 5563994834262912885}
   strength: 2.36
   SubmergeDepth: -3
   forceVisual: 1
@@ -329,9 +329,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IPAddr: 172.23.240.1
+  port: -1
   motorsPort: 1234
   gyroPort: 1235
   imageCommandsPort: 1236
+  general: 1
   msPerTransmit: 10
 --- !u!1 &1940583107704235139
 GameObject:
@@ -675,7 +677,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1320993440629130132}
   m_Layer: 0
-  m_Name: thruster_8
+  m_Name: thruster_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -690,7 +692,7 @@ Transform:
   m_GameObject: {fileID: 3865729731038652347}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.38268343, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: -0.25, y: -0.03, z: -0.3}
+  m_LocalPosition: {x: -0.241, y: -0.03, z: -0.309}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -955,7 +957,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6061109813799297149}
   m_Layer: 0
-  m_Name: thruster_1
+  m_Name: thruster_8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -970,7 +972,7 @@ Transform:
   m_GameObject: {fileID: 5563994834262912885}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.0675, y: -0.05, z: 0.275}
+  m_LocalPosition: {x: 0.117, y: -0.03, z: 0.396}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1053,7 +1055,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 1
@@ -1236,7 +1238,7 @@ GameObject:
   m_Component:
   - component: {fileID: 940374391908488269}
   m_Layer: 0
-  m_Name: thruster_6
+  m_Name: thruster_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1251,7 +1253,7 @@ Transform:
   m_GameObject: {fileID: 6010349454698828620}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.92387956, z: 0, w: 0.38268343}
-  m_LocalPosition: {x: 0.25, y: -0.03, z: 0.3}
+  m_LocalPosition: {x: 0.241, y: -0.03, z: 0.309}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1646,7 +1648,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7958291621658368133}
   m_Layer: 0
-  m_Name: thruster_3
+  m_Name: thruster_7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1661,7 +1663,7 @@ Transform:
   m_GameObject: {fileID: 6518905090109130357}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.0675, y: -0.05, z: -0.275}
+  m_LocalPosition: {x: 0.117, y: -0.03, z: -0.396}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1761,7 +1763,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1099353876688747496}
   m_Layer: 0
-  m_Name: thruster_7
+  m_Name: thruster_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1776,7 +1778,7 @@ Transform:
   m_GameObject: {fileID: 6927611447158964003}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.92387956, z: 0, w: 0.38268343}
-  m_LocalPosition: {x: -0.25, y: -0.03, z: 0.3}
+  m_LocalPosition: {x: -0.241, y: -0.03, z: 0.309}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1793,7 +1795,7 @@ GameObject:
   m_Component:
   - component: {fileID: 562973613512774975}
   m_Layer: 0
-  m_Name: thruster_5
+  m_Name: thruster_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1808,7 +1810,7 @@ Transform:
   m_GameObject: {fileID: 6986253656605163352}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 0.25, y: -0.03, z: -0.3}
+  m_LocalPosition: {x: 0.241, y: -0.03, z: -0.309}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1858,7 +1860,7 @@ GameObject:
   - component: {fileID: 5158596730072447103}
   - component: {fileID: 6380671237127367342}
   m_Layer: 7
-  m_Name: light rays
+  m_Name: light_rays
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1887,7 +1889,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8053017351978078826}
   serializedVersion: 8
-  lengthInSec: 10
+  lengthInSec: 1
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -7466,7 +7468,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1524594106842310081}
   m_Layer: 0
-  m_Name: thruster_4
+  m_Name: thruster_5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7481,7 +7483,7 @@ Transform:
   m_GameObject: {fileID: 8633875539015730965}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.0675, y: -0.05, z: -0.275}
+  m_LocalPosition: {x: -0.117, y: -0.03, z: -0.396}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -77,7 +77,7 @@ public class RobotForce : MonoBehaviour
         m_rigidBody.AddForce(transform.right    * front_force); // go forward
         m_rigidBody.AddForce(-transform.forward * side_force); // go right
         m_rigidBody.AddForce(transform.up       * up_force); // go up
-        print(up_force);
+        //print(up_force);
     }
     private void set_body_torque(){
         var x_torque = 4*.2f*limit_thruster_force(other_control[3] * strength * KGF_TO_N);

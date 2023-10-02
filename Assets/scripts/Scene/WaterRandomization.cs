@@ -8,7 +8,7 @@ public class WaterRandomization : MonoBehaviour
     private const int BG_SUM_MAX = 224;
     private const int BG_SUM_MIN = 140;
     private const int BG_MAX = (BG_SUM_MAX + BG_SUM_MIN) / 4;
-
+    public bool waterColorChanged = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,7 +21,7 @@ public class WaterRandomization : MonoBehaviour
     void Update()
     {
         count += 1;
-        if (count > 50) {
+        if (count > 100) {
             RandomScatteringColor();
             count = 0;
         }
@@ -35,5 +35,7 @@ public class WaterRandomization : MonoBehaviour
         waterScript.scatteringColor.g = green/255.0f;
         float brightness = Random.Range(0.3f, 1.0f);
         waterScript.scatteringColor *= brightness;
+        waterScript.scatteringColor.a = 0.45f;
+        waterColorChanged = true;
     }
 }
