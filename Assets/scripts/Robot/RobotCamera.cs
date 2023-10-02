@@ -23,6 +23,7 @@ public class RobotCamera : MonoBehaviour
     public int imgHeight = 480;
     public string frontCamFolderName = "FrontCam";
     public string downCamFolderName = "DownCam";
+    public bool ShowGUI = false;
     private string frontCamSavePath;
     private string downCamSavePath;
     private enum renderStatesEnum : int{
@@ -237,19 +238,21 @@ public class RobotCamera : MonoBehaviour
     //    Down_Capture();
     //}    
     void OnGUI(){
-        var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
-        if (GUI.Button(button_rect, "Space to capture, fps:" + (int)(1.0f / Time.smoothDeltaTime))){
-            renderState = renderStatesEnum.PreRender;
+        if (ShowGUI) {
+            var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
+            if (GUI.Button(button_rect, "Space to capture, fps:" + (int)(1.0f / Time.smoothDeltaTime))){
+                renderState = renderStatesEnum.PreRender;
+            }
+            //Debug.Log(GUI.transform);
+            //Debug.Log(Camera.main.name);
+            GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);
+            //var main_cam_display = new Rect(0, 0, mainCamera.pixelWidth, mainCamera.pixelHeight);
+            //GUI.DrawTexture(main_cam_display, mainCamera.targetTexture, ScaleMode.ScaleToFit);
+            var front_cam_display = new Rect(2*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
+            GUI.DrawTexture(front_cam_display, frontCamera.targetTexture, ScaleMode.ScaleToFit);
+            var down_cam_display = new Rect(3*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
+            GUI.DrawTexture(down_cam_display, downCamera.targetTexture,  ScaleMode.ScaleToFit);
         }
-        //Debug.Log(GUI.transform);
-        //Debug.Log(Camera.main.name);
-        GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);
-        //var main_cam_display = new Rect(0, 0, mainCamera.pixelWidth, mainCamera.pixelHeight);
-        //GUI.DrawTexture(main_cam_display, mainCamera.targetTexture, ScaleMode.ScaleToFit);
-        var front_cam_display = new Rect(2*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
-        GUI.DrawTexture(front_cam_display, frontCamera.targetTexture, ScaleMode.ScaleToFit);
-        var down_cam_display = new Rect(3*mainCamera.pixelWidth/4, 3*mainCamera.pixelHeight/4, mainCamera.pixelWidth/4, mainCamera.pixelHeight/4);
-        GUI.DrawTexture(down_cam_display, downCamera.targetTexture,  ScaleMode.ScaleToFit);
     }
     
 }

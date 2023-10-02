@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 4
+  m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 4817.3354, g: 4326.557, b: 4583.473, a: 1}
+  m_IndirectSpecularColor: {r: 4817.398, g: 4326.5493, b: 4583.516, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -419,12 +419,6 @@ MonoBehaviour:
   m_PointlightHDType: 0
   m_SpotLightShape: 0
   m_AreaLightShape: 0
---- !u!20 &424002539 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 6146853144427460279, guid: b74ea355523470b4c968ffdd0a45ed84,
-    type: 3}
-  m_PrefabInstance: {fileID: 1855465547}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &432432459
 GameObject:
   m_ObjectHideFlags: 0
@@ -754,125 +748,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1758765212
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1758765214}
-  - component: {fileID: 1758765213}
-  - component: {fileID: 1758765215}
-  m_Layer: 0
-  m_Name: Blur
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1758765213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758765212}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26d6499a6bd256e47b859377446493a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IsGlobal: 0
-  fadeRadius: 0
-  priority: 0
-  customPasses:
-  - rid: 7943112262378323968
-  injectionPoint: 3
-  m_TargetCamera: {fileID: 1873760809}
-  useTargetCamera: 1
-  references:
-    version: 2
-    RefIds:
-    - rid: 7943112262378323968
-      type: {class: SlightBlur, ns: , asm: Assembly-CSharp}
-      data:
-        m_Name: Custom Pass
-        enabled: 1
-        targetColorBuffer: 0
-        targetDepthBuffer: 0
-        clearFlags: 0
-        passFoldout: 0
-        m_Version: 0
-        radius: 2
-        useMask: 0
-        maskLayer:
-          serializedVersion: 2
-          m_Bits: 0
-        invertMask: 0
-        compositeShader: {fileID: 4800000, guid: d82546742f9c2b94d909ada774b0aa86,
-          type: 3}
-        whiteRenderersShader: {fileID: 4800000, guid: 8386dcbf863f5f94ba335f17fdf15443,
-          type: 3}
---- !u!4 &1758765214
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758765212}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.1417913, y: -1.6291041, z: -19.239555}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1758765215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1758765212}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26d6499a6bd256e47b859377446493a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IsGlobal: 0
-  fadeRadius: 0
-  priority: 0
-  customPasses:
-  - rid: 7943112262378323970
-  injectionPoint: 3
-  m_TargetCamera: {fileID: 424002539}
-  useTargetCamera: 1
-  references:
-    version: 2
-    RefIds:
-    - rid: 7943112262378323970
-      type: {class: SlightBlur, ns: , asm: Assembly-CSharp}
-      data:
-        m_Name: Custom Pass
-        enabled: 1
-        targetColorBuffer: 0
-        targetDepthBuffer: 0
-        clearFlags: 0
-        passFoldout: 0
-        m_Version: 0
-        radius: 2
-        useMask: 0
-        maskLayer:
-          serializedVersion: 2
-          m_Bits: 0
-        invertMask: 0
-        compositeShader: {fileID: 4800000, guid: d82546742f9c2b94d909ada774b0aa86,
-          type: 3}
-        whiteRenderersShader: {fileID: 4800000, guid: 8386dcbf863f5f94ba335f17fdf15443,
-          type: 3}
 --- !u!1001 &1855465547
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -951,6 +826,26 @@ PrefabInstance:
       propertyPath: forceVisual
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5158596730072447103, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.a
+      value: 0.3529412
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158596730072447103, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0.3207547
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158596730072447103, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.3207547
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158596730072447103, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0.3207547
+      objectReference: {fileID: 0}
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: forceVisual
@@ -959,7 +854,7 @@ PrefabInstance:
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: controlMethod
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -974,7 +869,7 @@ PrefabInstance:
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: 'other_control.Array.data[2]'
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -990,6 +885,26 @@ PrefabInstance:
         type: 3}
       propertyPath: 'other_control.Array.data[5]'
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: 'thrust_strengths.Array.data[4]'
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: 'thrust_strengths.Array.data[5]'
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: 'thrust_strengths.Array.data[6]'
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5771944606451129677, guid: b74ea355523470b4c968ffdd0a45ed84,
+        type: 3}
+      propertyPath: 'thrust_strengths.Array.data[7]'
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6543602415623900865, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
@@ -1026,12 +941,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b74ea355523470b4c968ffdd0a45ed84, type: 3}
---- !u!20 &1873760809 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 5149717260535381667, guid: b74ea355523470b4c968ffdd0a45ed84,
-    type: 3}
-  m_PrefabInstance: {fileID: 1855465547}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2013410473
 GameObject:
   m_ObjectHideFlags: 1
@@ -1155,7 +1064,6 @@ SceneRoots:
   - {fileID: 432432461}
   - {fileID: 2013410475}
   - {fileID: 30859353986372841}
-  - {fileID: 1758765214}
   - {fileID: 157207114}
   - {fileID: 508698749}
   - {fileID: 1187072252}

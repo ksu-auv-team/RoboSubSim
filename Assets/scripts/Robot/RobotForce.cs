@@ -6,12 +6,10 @@ public class RobotForce : MonoBehaviour
     private RobotIMU imu_script;
     public GameObject[] thrusters;
     public float strength = 2.36f;
-    public float SubmergeDepth;
     public bool forceVisual = true;
     [HideInInspector] public bool tcpControlled = false;
     public Material forceVisualMaterial;
     Rigidbody m_rigidBody;
-    Vector3[] thruster_directions;
     const float KGF_TO_N = 9.80665f;
     const float MAX_FORCE = 2.36f*KGF_TO_N;
     public float[] thrust_strengths = {0f,0f,0f,0f,0f,0f,0f,0f};
@@ -95,15 +93,15 @@ public class RobotForce : MonoBehaviour
     }
     private void set_body_angular_velocity(){
         Vector3 world_direction = transform.TransformDirection(new Vector3(other_control[3], other_control[5], -other_control[4]));
-        m_rigidBody.angularVelocity = world_direction;
+        m_rigidBody.angularVelocity = world_direction;  // unity does not recommend setting angular velocity directly (recommend to set torque or rotation)
     }
     void set_body_position(){
-        transform.position = new Vector3(other_control[0], other_control[2], -other_control[1]);
+        transform.position = new Vector3(other_control[1], other_control[2], -other_control[0]); // true world position (no good way of factoring imu noise)
     }
     void set_body_rotation(){
         //print(imu_script.imu.accumulatedGyroDrift.eulerAngles);
         transform.rotation = Quaternion.Euler(new Vector3(-other_control[4], -other_control[5], other_control[3]))
-                            * imu_script.imu.accumulatedGyroDrift;
+                            * imu_script.imu.accumulatedGyroDrift;  // imu drift factor
     }
     void stop_thrust(){
         add_thruster_force(0, 0);
@@ -175,32 +173,23 @@ public class RobotForce : MonoBehaviour
     void FixedUpdate(){
         //print(transform.rotation.eulerAngles); // (roll,yaw,pitch)
         //SubmergeDepth = GetComponent<buoyancy_forces>().underwater;
-        if (!tcpControlled){
-            if (transform.position.y <= SubmergeDepth) {
-                submerge(0);            
-                //spin(-strength * KGF_TO_N * random_thrust);
-            } else {
-                submerge(strength * KGF_TO_N);
-            }
-        } else {
-            switch (controlMethod) {
-                case controlMode.motors:    // Raw
-                    set_thrusts_strengths();
-                    break;
-                case controlMode.bodyForce: // local
-                    set_body_force();
-                    set_body_torque();
-                    break;
-                case controlMode.bodyVelocityFixedHeading:
-                    set_body_velocity();
-                    set_body_rotation();
-                    break;
-                case controlMode.Global:
-                    print("Global mode not implemented yet");
-                    break;
-            }
-            //print(thrust_strengths);
+        switch (controlMethod) {
+            case controlMode.motors:    // Raw
+                set_thrusts_strengths();
+                break;
+            case controlMode.bodyForce: // local
+                set_body_force();
+                set_body_torque();
+                break;
+            case controlMode.bodyVelocityFixedHeading:
+                set_body_velocity();
+                set_body_rotation();
+                break;
+            case controlMode.Global:
+                print("Global mode not implemented yet");
+                break;
         }
+            //print(thrust_strengths);
         //forward_force(strength * m_rigidBody.mass);
 
     }

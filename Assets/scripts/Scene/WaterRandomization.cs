@@ -20,11 +20,15 @@ public class WaterRandomization : MonoBehaviour
     int count = 0;
     void Update()
     {
-        count += 1;
-        if (count > 100) {
-            RandomScatteringColor();
-            count = 0;
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            RandomScatteringColor();          
         }
+        //count += 1;
+        //if (count > 100) {
+        //    RandomScatteringColor();
+        //    count = 0;
+        //}
         //print(count);
     }
     void RandomScatteringColor(){
@@ -35,7 +39,7 @@ public class WaterRandomization : MonoBehaviour
         waterScript.scatteringColor.g = green/255.0f;
         float brightness = Random.Range(0.3f, 1.0f);
         waterScript.scatteringColor *= brightness;
-        waterScript.scatteringColor.a = 0.45f;
+        //waterScript.scatteringColor.a = 0.35f;
         waterColorChanged = true;
     }
 }

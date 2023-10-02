@@ -8,10 +8,10 @@ public class TCPServer : MonoBehaviour
 {
     public string IPAddr = "127.0.0.1";
     public int port = -1;
-    public int motorsPort = -1;
-    public int gyroPort = -1;
-    public int imageCommandsPort = -1;
-    public bool general = true;
+    //public int motorsPort = -1;
+    //public int gyroPort = -1;
+    //public int imageCommandsPort = -1;
+    //public bool general = true;
     //bool running;
     public int msPerTransmit = 100;
 
@@ -24,39 +24,48 @@ public class TCPServer : MonoBehaviour
         motors = 1,
         imu = 2,
         commands = 3,
+        other = 4,
     }
-    private Thread threadMotors;
-    private Thread threadGyro;
-    private Thread threadImages;
+    //private Thread threadMotors;
+    //private Thread threadGyro;
+    //private Thread threadImages;
     private Thread threadGeneral;
-    private PortsID portsID; 
+    //private PortsID portsID; 
+    //[HideInInspector]
+    public bool runServer = false;
+    private bool serverStarted = false;
     void Start()
     {
         motor_script = GetComponent<RobotForce>();
         imu_script = GetComponent<RobotIMU>();
         camera_script = GetComponent<RobotCamera>();
-
         // Receive on a separate thread so Unity doesn't freeze waiting for data
-        if (general) {
-            threadGeneral = new Thread(() => GetData(port, PortsID.general));
-            threadGeneral.Start();
-        } else {
-            //ThreadStart tsMotors = new ThreadStart(GetData);
-            threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
-            threadMotors.Start();
-            //ThreadStart tsGyro = new ThreadStart(GetData);
-            threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
-            threadGyro.Start();
-            //ThreadStart tsImages = new ThreadStart(GetData);
-            threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
-            threadImages.Start();
+        threadGeneral = new Thread(() => GetData(port, PortsID.general));
+        //threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
+        //threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
+        //threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
+
+
+    }
+    void Update(){
+        if (!serverStarted && runServer) {
+            startThread();
+            serverStarted = true;
         }
-        
+        if (serverStarted && !runServer) {
+            stopThread();
+            serverStarted = false;
+        }
+        //print(runServer);
     }
     void OnDestroy(){
-        threadMotors.Abort();
-        threadGyro.Abort();
-        threadImages.Abort();
+        //if (general){
+            threadGeneral.Abort();
+        //}else{
+        //    threadMotors.Abort();
+        //    threadGyro.Abort();
+        //    threadImages.Abort();
+        //}
     }
     void GetData(int port, PortsID id)
     {
@@ -71,22 +80,31 @@ public class TCPServer : MonoBehaviour
                 motor_script.tcpControlled = true;
                 break;
         }
-        print("Thread created");
-        // Create the server
+        
         TcpListener server = new TcpListener(IPAddress.Parse(IPAddr), port);
         server.Start();
         print("Port:" + port + ", started on " + IPAddr + ". waiting connection...");
+        while (!server.Pending()) {
+            if (!runServer) {
+                server.Stop();
+                print("Port:" + port + ", closed on " + IPAddr);
+                return;
+            }
+        }
         // Create a client to get the data stream
         TcpClient client = server.AcceptTcpClient();
         NetworkStream nwStream = client.GetStream();
         print("Port:"+port + ", stream connected");
         // Start listening
-        bool running = true;
-        while (running)
+        bool running;
+        while (runServer)
         {
             running = Connection(client, nwStream, id);
         }
+        print("Port:" + port + ", closed on " + IPAddr);
         server.Stop();
+        // Create the server
+        
     }
 
     bool Connection(TcpClient client, NetworkStream nwStream, PortsID id)
@@ -190,10 +208,40 @@ public class TCPServer : MonoBehaviour
                 int command = int.Parse(stringArray[0]);
                 camera_script.CommandTrigger(command);
                 break;
+            case PortsID.other:
+                motor_script.other_control[0] = float.Parse(stringArray[0]);
+                motor_script.other_control[1] = float.Parse(stringArray[1]);
+                motor_script.other_control[2] = float.Parse(stringArray[2]);
+                motor_script.other_control[3] = float.Parse(stringArray[3]);
+                motor_script.other_control[4] = float.Parse(stringArray[4]);
+                motor_script.other_control[5] = float.Parse(stringArray[5]);
+                break;
         }
         return;
     }
 
+    void startThread(){
+        //if (general) {
+        //    if (!threadGeneral.IsAlive) {
+                threadGeneral.Start();
+        //    }
+        //} else {
+        //    threadMotors.Start();
+        //    threadGyro.Start();
+        //    threadImages.Start();
+        //}
+    }
+    void stopThread(){
+        //if (general) {
+            threadGeneral = new Thread(() => GetData(port, PortsID.general));
+        
+        //} else {
+        //    threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
+        //    threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
+        //    threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
+        //}
+    }
+    
     // Position is the data being received in this example
     //Vector3 position = Vector3.zero;
     //void Update()

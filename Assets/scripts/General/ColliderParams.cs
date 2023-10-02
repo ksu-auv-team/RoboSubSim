@@ -26,7 +26,8 @@ public class ColliderParams : MonoBehaviour
                 var light_ray = collision.gameObject.transform.Find("front_camera/light_rays");
                 if (light_ray != null) {
                     var ray_particle = light_ray.GetComponent<ParticleSystem>().main;
-                    ray_particle.startColor = waterColor.waterScript.scatteringColor;
+                    var ray_color = waterColor.waterScript.scatteringColor.maxColorComponent;
+                    ray_particle.startColor = new Color(ray_color, ray_color, ray_color, 0.45f);
                     //print(ray_particle.startColor.color);
                     waterColor.waterColorChanged = false;   // TODO: make this after all objects in collision instead of after first
                 }
