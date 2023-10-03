@@ -29,7 +29,7 @@ public class ColliderParams : MonoBehaviour
                     var ray_color = waterColor.waterScript.scatteringColor.maxColorComponent;
                     ray_particle.startColor = new Color(ray_color, ray_color, ray_color, 0.45f);
                     //print(ray_particle.startColor.color);
-                    waterColor.waterColorChanged = false;   // TODO: make this after all objects in collision instead of after first
+                    //waterColor.waterColorChanged = false;   // TODO: make this after all objects in collision instead of after first
                 }
             }
         }

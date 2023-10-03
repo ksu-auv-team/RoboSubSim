@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 7288635819623214197}
   m_Layer: 0
   m_Name: cube_wolf
-  m_TagString: Untagged
+  m_TagString: Robot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -331,11 +331,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IPAddr: 172.23.240.1
   port: -1
-  motorsPort: 1234
-  gyroPort: 1235
-  imageCommandsPort: 1236
-  general: 1
   msPerTransmit: 10
+  runServer: 0
 --- !u!1 &1940583107704235139
 GameObject:
   m_ObjectHideFlags: 0
@@ -1862,7 +1859,7 @@ GameObject:
   - component: {fileID: 6380671237127367342}
   m_Layer: 7
   m_Name: light_rays
-  m_TagString: Untagged
+  m_TagString: WaterColorDependent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

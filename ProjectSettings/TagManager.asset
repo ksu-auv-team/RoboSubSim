@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - WaterColorDependent
+  - Robot
   layers:
   - Default
   - TransparentFX
