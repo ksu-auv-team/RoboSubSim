@@ -26,21 +26,21 @@ public class RobotCamera : MonoBehaviour
     public bool ShowGUI = false;
     private string frontCamSavePath;
     private string downCamSavePath;
-    private enum renderStatesEnum : int{
+    public enum renderStatesEnum : int{
         Off = 0,
         PreRender = 1,
         Rendering = 2,
         Rendered = 3
     };
-    private enum CamCommandsID : int{
+    public enum CamCommandsID : int{
         front_no_percept = 0,   // front RGB
         down_no_percept = 1,    // down RGB
         both_no_percept = 2,    // RGB for both
         both_percept_only = 3,  // Segmentation for both
         all = 4                 // all four
     }
-    private renderStatesEnum renderState;
-    private CamCommandsID currentCommand = CamCommandsID.all;
+    public renderStatesEnum renderState;
+    public CamCommandsID currentCommand = CamCommandsID.all;
     private int currentFrames;
     void Start()
     {
@@ -75,7 +75,13 @@ public class RobotCamera : MonoBehaviour
         //MainCameraEnable();
         renderState = renderStatesEnum.Off;
     }
-
+    public void resetCameraTexture(){
+        print("Reset Render Texture");
+        frontCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+        downCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+        frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+        downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+    }
     // Update is called once per frame
     void Update()
     {

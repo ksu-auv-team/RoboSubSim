@@ -9,7 +9,7 @@ public class RobotForce : MonoBehaviour
     public bool forceVisual = true;
     [HideInInspector] public bool tcpControlled = false;
     public Material forceVisualMaterial;
-    Rigidbody m_rigidBody;
+    public Rigidbody m_rigidBody;
     const float KGF_TO_N = 9.80665f;
     const float MAX_FORCE = 2.36f*KGF_TO_N;
     public float[] thrust_strengths = {0f,0f,0f,0f,0f,0f,0f,0f};

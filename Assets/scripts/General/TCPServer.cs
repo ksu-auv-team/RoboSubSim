@@ -14,11 +14,11 @@ public class TCPServer : MonoBehaviour
     //public bool general = true;
     //bool running;
     public int msPerTransmit = 100;
-
+    private float currentTime = 0;
     private RobotIMU imu_script;
     private RobotForce motor_script;
     private RobotCamera camera_script;
-
+    public string ui_message = "Closed";
     private enum PortsID : int{
         general = 0,
         motors = 1,
@@ -83,10 +83,12 @@ public class TCPServer : MonoBehaviour
         
         TcpListener server = new TcpListener(IPAddress.Parse(IPAddr), port);
         server.Start();
+        ui_message = "Waiting... :"+IPAddr+":"+port;
         print("Port:" + port + ", started on " + IPAddr + ". waiting connection...");
         while (!server.Pending()) {
             if (!runServer) {
                 server.Stop();
+                ui_message = "Closed:"+IPAddr+":"+port;
                 print("Port:" + port + ", closed on " + IPAddr);
                 return;
             }
@@ -94,6 +96,7 @@ public class TCPServer : MonoBehaviour
         // Create a client to get the data stream
         TcpClient client = server.AcceptTcpClient();
         NetworkStream nwStream = client.GetStream();
+        ui_message = "Connected:"+IPAddr+":"+port;
         print("Port:"+port + ", stream connected");
         // Start listening
         bool running;
@@ -103,6 +106,7 @@ public class TCPServer : MonoBehaviour
         }
         print("Port:" + port + ", closed on " + IPAddr);
         server.Stop();
+        ui_message = "Closed:"+IPAddr+":"+port;
         // Create the server
         
     }
@@ -112,7 +116,11 @@ public class TCPServer : MonoBehaviour
         switch (id) {
             // receivers
             case PortsID.general:
-                ParseSendData(id, nwStream);
+                currentTime += (int)(Time.deltaTime * 1000);
+                if (currentTime > msPerTransmit){
+                    ParseSendData(id, nwStream);
+                    currentTime = 0;
+                }
                 goto case PortsID.motors;
             case PortsID.motors:
             case PortsID.commands:
