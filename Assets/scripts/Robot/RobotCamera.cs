@@ -66,7 +66,7 @@ public class RobotCamera : MonoBehaviour
             downPerceptionCameraScript = downPerceptionCameraObject.GetComponent<PerceptionCamera>();
             downPerceptionCamera = downPerceptionCameraObject.GetComponent<Camera>();
             //downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
-            //setCameraTexture();
+            setCameraTexture();
         }
         //MainCameraEnable();
         renderState = renderStatesEnum.Off;
@@ -77,8 +77,8 @@ public class RobotCamera : MonoBehaviour
         downCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
-        frontPerceptionCamera.enabled = true;
-        downPerceptionCamera.enabled = true;
+        print(imgWidth);
+        print(imgHeight);
     }
     // Update is called once per frame
     void Update()

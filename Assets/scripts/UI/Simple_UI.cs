@@ -8,6 +8,6 @@ public class Simple_UI : MonoBehaviour
     public Robot_UI complex_ui_script;
     public void ResetScene(){
         SceneManager.LoadScene("Scenes/OutdoorsScene");
-        complex_ui_script.refresh();
+        //complex_ui_script.refresh();
     }
 }

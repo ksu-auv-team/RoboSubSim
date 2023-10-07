@@ -69,6 +69,8 @@ public class Robot_UI : MonoBehaviour
     }
     public void configCamera(){
         //
+        print(camera_script.imgHeight);
+        print(int.Parse(ImageHeight.text));
         if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
             camera_script.imgHeight = int.Parse(ImageHeight.text);
             camera_script.imgWidth = int.Parse(ImageWidth.text);
