@@ -74,7 +74,10 @@ public class Robot_UI : MonoBehaviour
         if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
             camera_script.imgHeight = int.Parse(ImageHeight.text);
             camera_script.imgWidth = int.Parse(ImageWidth.text);
-            camera_script.setCameraTexture();
+
+            var tempRobot = Instantiate(Robot, Robot.transform.position, Robot.transform.rotation);
+            Destroy(Robot);
+            Robot = tempRobot;
         }
         camera_script.currentCommand = (RobotCamera.CamCommandsID)cameraModeDropdown.value;
     }
