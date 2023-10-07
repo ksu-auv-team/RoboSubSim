@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class Robot_UI : MonoBehaviour
 {
     public GameObject Robot;
@@ -21,10 +22,18 @@ public class Robot_UI : MonoBehaviour
     public TMPro.TMP_InputField ImageWidth;
     public TMPro.TMP_InputField ImageHeight;
     public TMPro.TMP_Dropdown cameraModeDropdown;
+    
     void Start(){
         refresh();
     }
     public void refresh(){
+        if (Robot == null){
+            Robot = GameObject.FindGameObjectWithTag("Robot");
+            if (Robot == null) {
+                return;
+            }
+        }
+        
         tcp_script = Robot.GetComponent<TCPServer>();
         control_script = Robot.GetComponent<RobotForce>();
         buoyancy_script = Robot.GetComponent<BuoyancyForces>();
@@ -63,14 +72,15 @@ public class Robot_UI : MonoBehaviour
         if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
             camera_script.imgHeight = int.Parse(ImageHeight.text);
             camera_script.imgWidth = int.Parse(ImageWidth.text);
-            camera_script.resetCameraTexture();
+            camera_script.setCameraTexture();
         }
         camera_script.currentCommand = (RobotCamera.CamCommandsID)cameraModeDropdown.value;
     }
     // Update is called once per frame
     void Update()
     {
-        
-        changeTCPMessage();
+        if (Robot != null){
+            changeTCPMessage();
+        }
     }
 }

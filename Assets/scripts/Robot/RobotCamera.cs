@@ -19,8 +19,10 @@ public class RobotCamera : MonoBehaviour
     private int downCounter;
     public int renderFramesCount = 1;
     public bool generateData = true;
-    public int imgWidth = 640;
-    public int imgHeight = 480;
+    //[HideInInspector]
+    public int imgWidth = 800;
+    //[HideInInspector]
+    public int imgHeight = 600;
     public string frontCamFolderName = "FrontCam";
     public string downCamFolderName = "DownCam";
     public bool ShowGUI = false;
@@ -52,13 +54,6 @@ public class RobotCamera : MonoBehaviour
         //mainCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         //mainCamera.targetDisplay = 1;
         if (generateData){
-            //
-            if (frontCamera.targetTexture == null){
-                frontCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
-            }
-            if (downCamera.targetTexture == null){
-                downCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
-            }
             frontCamSavePath = Application.persistentDataPath+"/"+frontCamFolderName;
             downCamSavePath = Application.persistentDataPath+"/"+downCamFolderName;
             System.IO.Directory.CreateDirectory(frontCamSavePath);
@@ -66,21 +61,24 @@ public class RobotCamera : MonoBehaviour
 
             frontPerceptionCameraScript = frontPerceptionCameraObject.GetComponent<PerceptionCamera>();
             frontPerceptionCamera = frontPerceptionCameraObject.GetComponent<Camera>();
-            frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+            //frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
 
             downPerceptionCameraScript = downPerceptionCameraObject.GetComponent<PerceptionCamera>();
             downPerceptionCamera = downPerceptionCameraObject.GetComponent<Camera>();
-            downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+            //downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+            //setCameraTexture();
         }
         //MainCameraEnable();
         renderState = renderStatesEnum.Off;
     }
-    public void resetCameraTexture(){
+    public void setCameraTexture(){
         print("Reset Render Texture");
         frontCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         downCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         downPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
+        frontPerceptionCamera.enabled = true;
+        downPerceptionCamera.enabled = true;
     }
     // Update is called once per frame
     void Update()
@@ -126,9 +124,10 @@ public class RobotCamera : MonoBehaviour
         renderState = renderStatesEnum.PreRender;
     }
     private void CommandDisable(){
+        #if WINDOWS
         frontCamera.enabled = false;
         downCamera.enabled = false;
-        #if WINDOWS
+        
         frontPerceptionCamera.enabled = false; // idk why ubuntu has fps issue with this, might be Vulkan stuff
         downPerceptionCamera.enabled = false;
         #endif
@@ -180,10 +179,6 @@ public class RobotCamera : MonoBehaviour
                 //downPerceptionCameraScript.RequestCapture();
                 //break;
             case CamCommandsID.both_percept_only:
-                #if (UNITY_STANDALONE_LINUX)
-                    print("There is some sort of bug with perception package in Linux Compiled, use editor in linux");
-                    break;
-                #endif
                 frontPerceptionCameraScript.RequestCapture();
                 downPerceptionCameraScript.RequestCapture();
                 break;
