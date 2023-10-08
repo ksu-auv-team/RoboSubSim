@@ -26,7 +26,7 @@ public class Robot_UI : MonoBehaviour
     void Start(){
         refresh();
     }
-    public void refresh(){
+    public void setNewRobot(){
         if (Robot == null){
             Robot = GameObject.FindGameObjectWithTag("Robot");
             if (Robot == null) {
@@ -39,6 +39,9 @@ public class Robot_UI : MonoBehaviour
         buoyancy_script = Robot.GetComponent<BuoyancyForces>();
         camera_script = Robot.GetComponent<RobotCamera>();
         imu_script = Robot.GetComponent<RobotIMU>();
+    }
+    public void refresh(){
+        setNewRobot();
 
         configTCPScript();
         //configRobotParams();
@@ -68,16 +71,23 @@ public class Robot_UI : MonoBehaviour
         camera_script.renderState = RobotCamera.renderStatesEnum.PreRender;
     }
     public void configCamera(){
-        //
-        print(camera_script.imgHeight);
-        print(int.Parse(ImageHeight.text));
         if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
             camera_script.imgHeight = int.Parse(ImageHeight.text);
             camera_script.imgWidth = int.Parse(ImageWidth.text);
-
+            
+            // check current tcp server (kill and re-enable on new robot)
+            bool hasServer = tcp_script.runServer;
+            if (hasServer) {runServer.isOn = false;}
+            
+            // create a new robot with proper perception camera resolutions
             var tempRobot = Instantiate(Robot, Robot.transform.position, Robot.transform.rotation);
             Destroy(Robot);
             Robot = tempRobot;
+            setNewRobot();
+
+            if (hasServer) {runServer.isOn = true;}
+            // copy settings to new robot
+             
         }
         camera_script.currentCommand = (RobotCamera.CamCommandsID)cameraModeDropdown.value;
     }

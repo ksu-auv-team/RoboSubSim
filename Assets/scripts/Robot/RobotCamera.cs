@@ -15,13 +15,15 @@ public class RobotCamera : MonoBehaviour
     private PerceptionCamera downPerceptionCameraScript;
     private Camera frontPerceptionCamera;
     private Camera downPerceptionCamera;
-    private int frontCounter;
-    private int downCounter;
+    [HideInInspector]
+    public int frontCounter = 0;
+    [HideInInspector]
+    public int downCounter = 0;
     public int renderFramesCount = 1;
     public bool generateData = true;
-    //[HideInInspector]
+    [HideInInspector]
     public int imgWidth = 800;
-    //[HideInInspector]
+    [HideInInspector]
     public int imgHeight = 600;
     public string frontCamFolderName = "FrontCam";
     public string downCamFolderName = "DownCam";
