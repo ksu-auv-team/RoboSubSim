@@ -122,12 +122,9 @@ public class TCPServer : MonoBehaviour
                 // Read data from the network stream
                 byte[] buffer = new byte[client.ReceiveBufferSize];
                 //if (nwStream.DataAvailable){
-                    print("1");
+                    //print("1");
                     int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
-                    if (bytesRead > client.ReceiveBufferSize/2) {
-                        break;
-                    }
-                    print("2");
+                    //print("2");
                     // Decode the bytes into a string
                     string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     //print(dataReceived);
@@ -173,8 +170,8 @@ public class TCPServer : MonoBehaviour
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                         imu_script.imu.linearAccel.y), 0, imu_buf, 20, 4);
                 nwStream.Write(imu_buf,0,imu_buf.Length);
-                //Debug.Log(imu_script.imu.quaternion.eulerAngles);
-                Debug.Log(System.BitConverter.IsLittleEndian);
+                Debug.Log(imu_script.imu.quaternion.eulerAngles);
+                //Debug.Log(System.BitConverter.IsLittleEndian);
                 break;
         }
     }
