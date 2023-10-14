@@ -49,7 +49,7 @@ public class RobotCamera : MonoBehaviour
     void Start()
     {
         if (SystemInfo.graphicsDeviceID == 0) {
-            print("Running in Server Mode, Cannot Render Images");
+            Debug.Log("Running in Server Mode, Cannot Render Images");
             return;
         }
         //mainCamera = Camera.main;
@@ -74,7 +74,7 @@ public class RobotCamera : MonoBehaviour
         renderState = renderStatesEnum.Off;
     }
     public void setCameraTexture(){
-        print("Reset Render Texture");
+        Debug.Log("Reset Render Texture");
         frontCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         downCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
         frontPerceptionCamera.targetTexture = new RenderTexture(imgWidth, imgHeight, 24);
@@ -122,11 +122,17 @@ public class RobotCamera : MonoBehaviour
         
     }
     public void CommandTrigger(int command){
+        if (renderState != renderStatesEnum.Off) {
+            print("NO CAPTURE");
+            return;
+        }
+        print("CAPTURE");
         currentCommand = (CamCommandsID)command;
         renderState = renderStatesEnum.PreRender;
     }
     private void CommandDisable(){
         #if WINDOWS
+        Debug.Log("Disabling Cameras");
         frontCamera.enabled = false;
         downCamera.enabled = false;
         

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 public class Robot_UI : MonoBehaviour
 {
-    public GameObject Robot;
+    private GameObject Robot;
     TCPServer tcp_script;
     RobotForce control_script;
     BuoyancyForces buoyancy_script;
@@ -43,9 +43,12 @@ public class Robot_UI : MonoBehaviour
     public void refresh(){
         setNewRobot();
 
+        if (Robot == null) {
+            return;
+        }
         configTCPScript();
-        //configRobotParams();
         configRobotParams();
+        configControlMode();
         configCamera();
         changeTCPMessage();
     }

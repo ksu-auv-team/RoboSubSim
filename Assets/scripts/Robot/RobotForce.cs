@@ -7,7 +7,6 @@ public class RobotForce : MonoBehaviour
     public GameObject[] thrusters;
     public float strength = 2.36f;
     public bool forceVisual = true;
-    [HideInInspector] public bool tcpControlled = false;
     public Material forceVisualMaterial;
     public Rigidbody m_rigidBody;
     const float KGF_TO_N = 9.80665f;
