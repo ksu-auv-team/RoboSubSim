@@ -62,12 +62,21 @@ public class RobotIMU : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        resetIMUWithNoise();
+        m_rigidbody = this.GetComponent<Rigidbody>();
+    }
+    void resetIMUWithNoise(float accN = 150f, float accD = 0f, float gyroN = 0.1f, float gyroD = 1.5f){
+        accelNoise = accN;
+        accelNoiseDrift = accD;
+        gyroNoise = gyroN;
+        gyroNoiseDrift = gyroD;
         imu = new IMU(accelNoise * Mathf.Abs(Physics.gravity.y) * .000001f * Mathf.Sqrt(1/Time.fixedDeltaTime),
                     accelNoiseDrift * Mathf.Abs(Physics.gravity.y) * .000001f * Mathf.Sqrt(1/Time.fixedDeltaTime),
                     gyroNoise, gyroNoiseDrift);
-        m_rigidbody = this.GetComponent<Rigidbody>();
     }
-
+    void resetIMUWithoutNoise(){
+        imu = new IMU(0,0,0,0);
+    }
     // Update is called once per frame
     //void Update()
     //{

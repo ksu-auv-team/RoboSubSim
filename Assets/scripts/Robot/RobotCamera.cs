@@ -132,7 +132,7 @@ public class RobotCamera : MonoBehaviour
         currentCommand = (CamCommandsID)command;
         renderState = renderStatesEnum.PreRender;
     }
-    private void CommandDisable(){
+    public void CommandDisable(){
         #if WINDOWS
         Debug.Log("Disabling Cameras");
         frontCamera.enabled = false;
@@ -243,7 +243,15 @@ public class RobotCamera : MonoBehaviour
             frontCounter += 1;
         }
     }
-
+    public void configCommand(int command){
+        currentCommand = (CamCommandsID)command;
+        if (currentCommand == CamCommandsID.NoCapture) {
+            CommandDisable();
+            renderState = renderStatesEnum.NoCapture;
+        } else {
+            renderState = renderStatesEnum.Off;
+        }
+    }
     //private void Capture(){
     //    Front_Capture();
     //    Down_Capture();

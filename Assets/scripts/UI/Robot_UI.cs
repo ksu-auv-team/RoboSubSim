@@ -71,7 +71,9 @@ public class Robot_UI : MonoBehaviour
     }
     public void captureImage(){
         camera_script.generateData = true;
-        camera_script.renderState = RobotCamera.renderStatesEnum.PreRender;
+        //camera_script.configCommand(cameraModeDropdown.value);
+        camera_script.CommandTrigger(cameraModeDropdown.value);
+        //camera_script.renderState = RobotCamera.renderStatesEnum.PreRender;
     }
     public void configCamera(){
         if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
@@ -92,13 +94,7 @@ public class Robot_UI : MonoBehaviour
             // copy settings to new robot
              
         }
-        camera_script.currentCommand = (RobotCamera.CamCommandsID)cameraModeDropdown.value;
-        if (camera_script.currentCommand == RobotCamera.CamCommandsID.NoCapture) {
-            //camera_script.CommandDisable();
-            camera_script.renderState = RobotCamera.renderStatesEnum.NoCapture;
-        } else {
-            camera_script.renderState = RobotCamera.renderStatesEnum.Off;
-        }
+        camera_script.configCommand(cameraModeDropdown.value);
     }
     // Update is called once per frame
     void Update()
