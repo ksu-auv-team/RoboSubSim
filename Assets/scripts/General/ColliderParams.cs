@@ -20,7 +20,7 @@ public class ColliderParams : MonoBehaviour
     void OnTriggerStay(Collider collision){
         //print(collision.gameObject.name);
         //bool everything_changed = false;
-        if (waterColor.waterColorChanged) {
+        //if (waterColor.waterColorChanged) {
             //print(collision.gameObject.name);
             if(collision.gameObject.tag == "WaterColorDependent") {
                 var light_ray = collision.gameObject.transform.Find("front_camera/light_rays");
@@ -32,6 +32,6 @@ public class ColliderParams : MonoBehaviour
                     //waterColor.waterColorChanged = false;   // TODO: make this after all objects in collision instead of after first
                 }
             }
-        }
+        //}
     }
 }

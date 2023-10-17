@@ -16,11 +16,17 @@ MonoBehaviour:
   - label: gate
     id: 1
     hierarchyRelation: 0
-  - label: Cube
+  - label: buoy1
     id: 2
     hierarchyRelation: 0
-  - label: cereal_cheerios_honeynut
+  - label: buoy2
     id: 3
+    hierarchyRelation: 0
+  - label: buoy3
+    id: 4
+    hierarchyRelation: 0
+  - label: buoy4
+    id: 5
     hierarchyRelation: 0
   autoAssignIds: 1
   startingLabelId: 1

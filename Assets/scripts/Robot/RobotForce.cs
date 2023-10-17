@@ -23,11 +23,17 @@ public class RobotForce : MonoBehaviour
         Local = 1,
         Global = 2,
         motors = 0,
-        
-        bodyForce = 1,
-        bodyVelocityFixedHeading = 3
-
+        ForceTorque =       3,  // 1st, 1st order
+        ForceVelocity =     4,  // 1st, 2nd order
+        ForceDegree =       5,  // 1st, 3rd order
+        VelocityDegree =    6,  // 2nd, 1st order
+        VelocityVelocity =  7,  // 2nd, 2th order
+        VelocityTorque =    8,  // 2nd, 3rd order
+        PositionDegree =    9,  // 1st, 1st order
+        PositionVelocity =  10, // 1st, 2nd order
+        PositionTorque =    11  // 1st, 3rd order
     }
+    [HideInInspector]
     public controlMode controlMethod = controlMode.motors;
     // Start is called before the first frame update
     void Start()
@@ -133,8 +139,9 @@ public class RobotForce : MonoBehaviour
         add_thruster_force(7, -force);
     }
     float limit_thruster_force(float force){
+        // max forward/reverse spec sheet: https://www.thingbits.in/products/t100-thruster-no-esc
         if (force < 0) {
-            force = force * 1.85f / 2.36f; // max forward/reverse spec sheet: https://www.thingbits.in/products/t100-thruster-no-esc
+            force = force * 1.85f / 2.36f; 
         }
         if (force > MAX_FORCE) {
             force = MAX_FORCE;
@@ -176,11 +183,11 @@ public class RobotForce : MonoBehaviour
             case controlMode.motors:    // Raw
                 set_thrusts_strengths();
                 break;
-            case controlMode.bodyForce: // local
+            case controlMode.ForceTorque: // local
                 set_body_force();
                 set_body_torque();
                 break;
-            case controlMode.bodyVelocityFixedHeading:
+            case controlMode.VelocityDegree:
                 set_body_velocity();
                 set_body_rotation();
                 break;

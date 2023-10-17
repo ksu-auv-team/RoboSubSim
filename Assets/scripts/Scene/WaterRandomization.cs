@@ -8,7 +8,10 @@ public class WaterRandomization : MonoBehaviour
     private const int BG_SUM_MAX = 224;
     private const int BG_SUM_MIN = 140;
     private const int BG_MAX = (BG_SUM_MAX + BG_SUM_MIN) / 4;
-    public bool waterColorChanged = false;
+    public float centerVisibility = 5f;
+    public float multiplierVisibility = 2.5f;
+
+    private bool waterColorChanged = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,12 +20,12 @@ public class WaterRandomization : MonoBehaviour
     }
 
     // Update is called once per frame
-    int count = 0;
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            RandomScatteringColor();          
+            RandomScatteringColor();
+            RandomVisibility();
         }
         //count += 1;
         //if (count > 100) {
@@ -30,6 +33,10 @@ public class WaterRandomization : MonoBehaviour
         //    count = 0;
         //}
         //print(count);
+    }
+    public void RandomizeWater(){
+        RandomScatteringColor();
+        RandomVisibility();
     }
     void RandomScatteringColor(){
         int sum_color = Random.Range(BG_SUM_MIN, BG_SUM_MAX);
@@ -41,5 +48,9 @@ public class WaterRandomization : MonoBehaviour
         waterScript.scatteringColor *= brightness;
         //waterScript.scatteringColor.a = 0.35f;
         waterColorChanged = true;
+    }
+    void RandomVisibility(){
+        waterScript.absorptionDistance = centerVisibility * Random.Range(0.9f,1.1f); // surface visiblility (meters)
+        waterScript.absorptionDistanceMultiplier = multiplierVisibility * Random.Range(0.9f,1.1f); // underwater visibility (multiplier of surface)
     }
 }
