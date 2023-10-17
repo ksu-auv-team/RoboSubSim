@@ -34,16 +34,18 @@ public class RobotCamera : MonoBehaviour
         Off = 0,
         PreRender = 1,
         Rendering = 2,
-        Rendered = 3
+        Rendered = 3,
+        NoCapture = 4
     };
     public enum CamCommandsID : int{
         front_no_percept = 0,   // front RGB
         down_no_percept = 1,    // down RGB
         both_no_percept = 2,    // RGB for both
         both_percept_only = 3,  // Segmentation for both
-        all = 4                 // all four
+        all = 4,                 // all four
+        NoCapture = 5
     }
-    public renderStatesEnum renderState;
+    public renderStatesEnum renderState = renderStatesEnum.Off;
     public CamCommandsID currentCommand = CamCommandsID.all;
     private int currentFrames;
     void Start()
@@ -71,7 +73,7 @@ public class RobotCamera : MonoBehaviour
             setCameraTexture();
         }
         //MainCameraEnable();
-        renderState = renderStatesEnum.Off;
+        //renderState = renderStatesEnum.Off;
     }
     public void setCameraTexture(){
         Debug.Log("Reset Render Texture");

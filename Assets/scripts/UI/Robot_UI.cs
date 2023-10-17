@@ -93,6 +93,12 @@ public class Robot_UI : MonoBehaviour
              
         }
         camera_script.currentCommand = (RobotCamera.CamCommandsID)cameraModeDropdown.value;
+        if (camera_script.currentCommand == RobotCamera.CamCommandsID.NoCapture) {
+            //camera_script.CommandDisable();
+            camera_script.renderState = RobotCamera.renderStatesEnum.NoCapture;
+        } else {
+            camera_script.renderState = RobotCamera.renderStatesEnum.Off;
+        }
     }
     // Update is called once per frame
     void Update()

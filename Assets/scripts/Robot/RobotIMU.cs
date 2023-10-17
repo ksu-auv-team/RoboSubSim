@@ -69,10 +69,10 @@ public class RobotIMU : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    //void Update()
+    //{
         
-    }
+    //}
     void FixedUpdate(){
         imu.quaternion = transform.rotation;
         // v1 = v0 + acc * dt

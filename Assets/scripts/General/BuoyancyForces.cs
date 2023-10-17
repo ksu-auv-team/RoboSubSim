@@ -25,10 +25,10 @@ public class BuoyancyForces : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    //void Update()
+    //{
         
-    }
+    //}
 
     void FixedUpdate(){
         // TODO: scale buoyancy force with partial underwater 

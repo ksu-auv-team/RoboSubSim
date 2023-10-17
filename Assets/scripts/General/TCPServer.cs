@@ -121,7 +121,7 @@ public class TCPServer : MonoBehaviour
             case PortsID.commands:
                 // Read data from the network stream
                 byte[] buffer = new byte[client.ReceiveBufferSize];
-                //if (nwStream.DataAvailable){
+                if (nwStream.DataAvailable){
                     //print("1");
                     int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
                     //print("2");
@@ -136,7 +136,7 @@ public class TCPServer : MonoBehaviour
                         ParseReceivedData(dataReceived, id);
                     //nwStream.Write(buffer, 0, bytesRead);
                     }
-                //}
+                }
                 
                 break;
             // transmitters
