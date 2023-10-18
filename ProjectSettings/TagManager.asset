@@ -8,6 +8,7 @@ TagManager:
   - Robot
   - 2023Objective
   - Pool
+  - Environment
   layers:
   - Default
   - TransparentFX
