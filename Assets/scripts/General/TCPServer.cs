@@ -6,6 +6,7 @@ using System.Threading;
 
 public class TCPServer : MonoBehaviour
 {
+    SceneManagement sceneManagement;
     public string IPAddr = "127.0.0.1";
     public int port = -1;
     //public int motorsPort = -1;
@@ -36,9 +37,10 @@ public class TCPServer : MonoBehaviour
     private bool serverStarted = false;
     void Start()
     {
-        motor_script = GetComponent<RobotForce>();
-        imu_script = GetComponent<RobotIMU>();
-        camera_script = GetComponent<RobotCamera>();
+        sceneManagement = GetComponent<SceneManagement>();
+        //motor_script = GetComponent<RobotForce>();
+        //imu_script = GetComponent<RobotIMU>();
+        //camera_script = GetComponent<RobotCamera>();
         // Receive on a separate thread so Unity doesn't freeze waiting for data
         threadGeneral = new Thread(() => GetData(port, PortsID.general));
         //threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
@@ -136,6 +138,8 @@ public class TCPServer : MonoBehaviour
                         ParseReceivedData(dataReceived, id);
                     //nwStream.Write(buffer, 0, bytesRead);
                     }
+                } else {
+                    Debug.Log("1");
                 }
                 
                 break;
@@ -157,20 +161,21 @@ public class TCPServer : MonoBehaviour
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes('I'), 0, imu_buf, 24, 2);
                 goto case PortsID.imu;
             case PortsID.imu:
+                IMU imu = sceneManagement.getRobotIMU();
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu_script.imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
+                                        imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        360-imu_script.imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
+                                        360-imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        360-imu_script.imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
+                                        360-imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        -imu_script.imu.linearAccel.z), 0, imu_buf, 12, 4);
+                                        -imu.linearAccel.z), 0, imu_buf, 12, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu_script.imu.linearAccel.x), 0, imu_buf, 16, 4);
+                                        imu.linearAccel.x), 0, imu_buf, 16, 4);
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu_script.imu.linearAccel.y), 0, imu_buf, 20, 4);
+                                        imu.linearAccel.y), 0, imu_buf, 20, 4);
                 nwStream.Write(imu_buf,0,imu_buf.Length);
-                Debug.Log(imu_script.imu.quaternion.eulerAngles);
+                Debug.Log(imu.quaternion.eulerAngles);
                 //Debug.Log(System.BitConverter.IsLittleEndian);
                 break;
         }
@@ -178,7 +183,7 @@ public class TCPServer : MonoBehaviour
     // Use-case specific function, need to re-write this to interpret whatever data is being sent
     void ParseReceivedData(string dataString, PortsID id)
     {
-        Debug.Log(dataString);
+        //Debug.Log(dataString);
         string [] packets = dataString.Split('|');
         foreach (string packet in packets){
             //print(packets.Length);
@@ -206,26 +211,28 @@ public class TCPServer : MonoBehaviour
                     }
                     break;
                 case PortsID.motors:
-                    motor_script.thrust_strengths[0] = float.Parse(stringArray[0]);
-                    motor_script.thrust_strengths[1] = float.Parse(stringArray[1]);
-                    motor_script.thrust_strengths[2] = float.Parse(stringArray[2]);
-                    motor_script.thrust_strengths[3] = float.Parse(stringArray[3]);
-                    motor_script.thrust_strengths[4] = float.Parse(stringArray[4]);
-                    motor_script.thrust_strengths[5] = float.Parse(stringArray[5]);
-                    motor_script.thrust_strengths[6] = float.Parse(stringArray[6]);
-                    motor_script.thrust_strengths[7] = float.Parse(stringArray[7]);
+                    sceneManagement.setMotorPower(
+                        float.Parse(stringArray[0]),
+                        float.Parse(stringArray[1]),
+                        float.Parse(stringArray[2]),
+                        float.Parse(stringArray[3]),
+                        float.Parse(stringArray[4]),
+                        float.Parse(stringArray[5]),
+                        float.Parse(stringArray[6]),
+                        float.Parse(stringArray[7]));
+                    break;
+                case PortsID.other:
+                    sceneManagement.setOtherControlPower(
+                        float.Parse(stringArray[0]),
+                        float.Parse(stringArray[1]),
+                        float.Parse(stringArray[2]),
+                        float.Parse(stringArray[3]),
+                        float.Parse(stringArray[4]),
+                        float.Parse(stringArray[5]));
                     break;
                 case PortsID.commands:
                     int command = int.Parse(stringArray[0]);
-                    camera_script.CommandTrigger(command);
-                    break;
-                case PortsID.other:
-                    motor_script.other_control[0] = float.Parse(stringArray[0]);
-                    motor_script.other_control[1] = float.Parse(stringArray[1]);
-                    motor_script.other_control[2] = float.Parse(stringArray[2]);
-                    motor_script.other_control[3] = float.Parse(stringArray[3]);
-                    motor_script.other_control[4] = float.Parse(stringArray[4]);
-                    motor_script.other_control[5] = float.Parse(stringArray[5]);
+                    sceneManagement.triggerCapture(command);
                     break;
             }
         }

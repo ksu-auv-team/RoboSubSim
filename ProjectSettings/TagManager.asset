@@ -9,6 +9,7 @@ TagManager:
   - 2023Objective
   - Pool
   - Environment
+  - SceneManagement
   layers:
   - Default
   - TransparentFX

@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 4733229795996780093}
   - component: {fileID: 5771944606451129677}
   - component: {fileID: 7325955720987588687}
-  - component: {fileID: 7288635819623214197}
   m_Layer: 0
   m_Name: cube_wolf
   m_TagString: Robot
@@ -321,23 +320,6 @@ MonoBehaviour:
   ShowGUI: 0
   renderState: 0
   currentCommand: 4
---- !u!114 &7288635819623214197
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196306731892029154}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2d169406667a7449a5d6940174c9cca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IPAddr: 172.23.240.1
-  port: -1
-  msPerTransmit: 10
-  ui_message: Closed
-  runServer: 0
 --- !u!1 &1940583107704235139
 GameObject:
   m_ObjectHideFlags: 0

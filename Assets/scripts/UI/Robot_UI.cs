@@ -5,12 +5,13 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 public class Robot_UI : MonoBehaviour
 {
-    private GameObject Robot;
-    TCPServer tcp_script;
-    RobotForce control_script;
-    BuoyancyForces buoyancy_script;
-    RobotCamera camera_script;
-    RobotIMU imu_script;
+    //private GameObject Robot;
+    SceneManagement sceneManagement;
+    //TCPServer tcp_script;
+    //RobotForce control_script;
+    //BuoyancyForces buoyancy_script;
+    //RobotCamera camera_script;
+    //RobotIMU imu_script;
     public TMPro.TMP_InputField IPaddr;
     public TMPro.TMP_InputField Port;
     public TMPro.TMP_InputField SendFreq;
@@ -23,27 +24,28 @@ public class Robot_UI : MonoBehaviour
     public TMPro.TMP_InputField ImageHeight;
     public TMPro.TMP_Dropdown cameraModeDropdown;
     
+    //public void setNewRobot(){
+    //    if (Robot == null){
+    //        Robot = GameObject.FindGameObjectWithTag("Robot");
+    //        if (Robot == null) {
+    //            return;
+    //        }
+    //    }
+    //    
+    //    //tcp_script = Robot.GetComponent<TCPServer>();
+    //    control_script = Robot.GetComponent<RobotForce>();
+    //    buoyancy_script = Robot.GetComponent<BuoyancyForces>();
+    //    camera_script = Robot.GetComponent<RobotCamera>();
+    //    imu_script = Robot.GetComponent<RobotIMU>();
+    //}
     void Start(){
         refresh();
     }
-    public void setNewRobot(){
-        if (Robot == null){
-            Robot = GameObject.FindGameObjectWithTag("Robot");
-            if (Robot == null) {
-                return;
-            }
-        }
-        
-        tcp_script = Robot.GetComponent<TCPServer>();
-        control_script = Robot.GetComponent<RobotForce>();
-        buoyancy_script = Robot.GetComponent<BuoyancyForces>();
-        camera_script = Robot.GetComponent<RobotCamera>();
-        imu_script = Robot.GetComponent<RobotIMU>();
-    }
     public void refresh(){
-        setNewRobot();
-
-        if (Robot == null) {
+        sceneManagement = GameObject.FindGameObjectWithTag("SceneManagement").GetComponent<SceneManagement>();
+        //setNewRobot();
+        //
+        if (sceneManagement == null) {
             return;
         }
         configTCPScript();
@@ -53,53 +55,59 @@ public class Robot_UI : MonoBehaviour
         changeTCPMessage();
     }
     public void changeTCPMessage(){
-        TCPMessage.text = tcp_script.ui_message;
+        TCPMessage.text = sceneManagement.tcpServer.ui_message;
     }
     public void configTCPScript(){
-        print("UI TOGGLE");
-        tcp_script.IPAddr = IPaddr.text;
-        tcp_script.port = int.Parse(Port.text);
-        tcp_script.runServer = runServer.isOn;
-        tcp_script.msPerTransmit = int.Parse(SendFreq.text);
+        //print("UI TOGGLE");
+        sceneManagement.setupTCPServer(IPaddr.text,
+                                        int.Parse(Port.text),
+                                        runServer.isOn,
+                                        int.Parse(SendFreq.text));
+        //tcp_script.IPAddr = IPaddr.text;
+        //tcp_script.port = int.Parse(Port.text);
+        //tcp_script.runServer = runServer.isOn;
+        //tcp_script.msPerTransmit = int.Parse(SendFreq.text);
     }
     public void configControlMode(){
-        control_script.controlMethod = (RobotForce.controlMode)controlModeDropdown.value;
+        sceneManagement.configRobotControlMode(controlModeDropdown.value);
+        //control_script.controlMethod = (RobotForce.controlMode)controlModeDropdown.value;
     }
     public void configRobotParams(){
-        control_script.m_rigidBody.mass = float.Parse(Mass.text);
-        buoyancy_script.volumeDisplaced = float.Parse(Volume.text);
+        sceneManagement.configRobotParams(float.Parse(Mass.text), float.Parse(Volume.text));
     }
     public void captureImage(){
-        camera_script.generateData = true;
+        sceneManagement.captureImage(cameraModeDropdown.value);
+        //camera_script.generateData = true;
         //camera_script.configCommand(cameraModeDropdown.value);
-        camera_script.CommandTrigger(cameraModeDropdown.value);
+        //camera_script.CommandTrigger(cameraModeDropdown.value);
         //camera_script.renderState = RobotCamera.renderStatesEnum.PreRender;
     }
     public void configCamera(){
-        if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
-            camera_script.imgHeight = int.Parse(ImageHeight.text);
-            camera_script.imgWidth = int.Parse(ImageWidth.text);
-            
-            // check current tcp server (kill and re-enable on new robot)
-            bool hasServer = tcp_script.runServer;
-            if (hasServer) {runServer.isOn = false;}
-            
-            // create a new robot with proper perception camera resolutions
-            var tempRobot = Instantiate(Robot, Robot.transform.position, Robot.transform.rotation);
-            Destroy(Robot);
-            Robot = tempRobot;
-            setNewRobot();
-
-            if (hasServer) {runServer.isOn = true;}
+        sceneManagement.configRobotCamera(int.Parse(ImageHeight.text), int.Parse(ImageWidth.text), cameraModeDropdown.value);
+        //return;
+        //if (camera_script.imgHeight != int.Parse(ImageHeight.text) || camera_script.imgWidth != int.Parse(ImageWidth.text)){
+        //    camera_script.imgHeight = int.Parse(ImageHeight.text);
+        //    camera_script.imgWidth = int.Parse(ImageWidth.text);
+        //    
+        //    // check current tcp server (kill and re-enable on new robot)
+        //    bool hasServer = sceneManagement.tcpServer.runServer;
+        //    if (hasServer) {runServer.isOn = false;}
+        //    
+        //    // create a new robot with proper perception camera resolutions
+        //    var tempRobot = Instantiate(Robot, Robot.transform.position, Robot.transform.rotation);
+        //    Destroy(Robot);
+        //    Robot = tempRobot;
+        //    setNewRobot();
+        //    if (hasServer) {runServer.isOn = true;}
             // copy settings to new robot
              
-        }
-        camera_script.configCommand(cameraModeDropdown.value);
+        //}
+        //camera_script.configCommand(cameraModeDropdown.value);
     }
     // Update is called once per frame
     void Update()
     {
-        if (Robot != null){
+        if (sceneManagement != null){
             changeTCPMessage();
         }
     }
