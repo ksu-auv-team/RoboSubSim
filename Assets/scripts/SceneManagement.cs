@@ -37,8 +37,6 @@ public class SceneManagement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        registerAllSceneObjects();
-        displayAllRegisteredObjectsNames();
         setupTCPServer();
     }
     // Update is called once per frame
@@ -164,6 +162,7 @@ public class SceneManagement : MonoBehaviour
         foreach (string tag in tagNames){
             gameObjects.Add(GameObject.FindGameObjectsWithTag(tag));
             if (System.String.Equals(tag, tagNames[ROBOT])) {
+                allRobots.Clear();
                 foreach (GameObject rob in GameObject.FindGameObjectsWithTag(tag)){
                     TCPRobot cur = new TCPRobot();
                     cur.setNewRobot(rob);

@@ -16,9 +16,9 @@ public class TCPServer : MonoBehaviour
     //bool running;
     public int msPerTransmit = 100;
     private float currentTime = 0;
-    private RobotIMU imu_script;
-    private RobotForce motor_script;
-    private RobotCamera camera_script;
+    //private RobotIMU imu_script;
+    //private RobotForce motor_script;
+    //private RobotCamera camera_script;
     public string ui_message = "Closed";
     private enum PortsID : int{
         general = 0,

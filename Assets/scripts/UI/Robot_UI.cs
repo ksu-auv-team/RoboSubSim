@@ -48,6 +48,8 @@ public class Robot_UI : MonoBehaviour
         if (sceneManagement == null) {
             return;
         }
+        sceneManagement.registerAllSceneObjects();
+        sceneManagement.displayAllRegisteredObjectsNames();
         configTCPScript();
         configRobotParams();
         configControlMode();
