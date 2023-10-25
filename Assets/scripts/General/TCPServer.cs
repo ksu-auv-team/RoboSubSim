@@ -91,7 +91,10 @@ public class TCPServer : MonoBehaviour
         }
         // Create a client to get the data stream
         TcpClient client = server.AcceptTcpClient();
-        client.ReceiveBufferSize = 512;
+
+        // TODO: FIND BETTER MESSAGE PROCESSING METHODS SO THIS NUMBER CAN BE AS LOW AS POSSIBLE
+        client.ReceiveBufferSize = 64;  
+
         NetworkStream nwStream = client.GetStream();
         ui_message = "Connected:"+IPAddr+":"+port;
         Debug.Log("Port:"+port + ", stream connected");
@@ -126,6 +129,7 @@ public class TCPServer : MonoBehaviour
                 if (nwStream.DataAvailable){
                     //print("1");
                     int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+                    print(bytesRead);
                     //print("2");
                     // Decode the bytes into a string
                     string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
@@ -139,7 +143,7 @@ public class TCPServer : MonoBehaviour
                     //nwStream.Write(buffer, 0, bytesRead);
                     }
                 } else {
-                    Debug.Log("1");
+                    //Debug.Log("No msg received");
                 }
                 
                 break;
@@ -175,7 +179,7 @@ public class TCPServer : MonoBehaviour
                 System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                         imu.linearAccel.y), 0, imu_buf, 20, 4);
                 nwStream.Write(imu_buf,0,imu_buf.Length);
-                Debug.Log(imu.quaternion.eulerAngles);
+                //Debug.Log(imu.quaternion.eulerAngles);
                 //Debug.Log(System.BitConverter.IsLittleEndian);
                 break;
         }
@@ -252,7 +256,7 @@ public class TCPServer : MonoBehaviour
     }
     void stopThread(){
         //if (general) {
-            //threadGeneral.Abort();
+            threadGeneral.Abort();
             threadGeneral = new Thread(() => GetData(port, PortsID.general));
         
         //} else {

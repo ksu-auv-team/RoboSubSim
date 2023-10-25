@@ -46,15 +46,18 @@ public class Robot_UI : MonoBehaviour
         //setNewRobot();
         //
         if (sceneManagement == null) {
+            print("No Scene Management Found");
             return;
         }
         sceneManagement.registerAllSceneObjects();
         sceneManagement.displayAllRegisteredObjectsNames();
         configTCPScript();
-        configRobotParams();
-        configControlMode();
-        configCamera();
         changeTCPMessage();
+        if (sceneManagement.getRobotCount() > 0){
+            configRobotParams();
+            configControlMode();
+            configCamera();            
+        }
     }
     public void changeTCPMessage(){
         TCPMessage.text = sceneManagement.tcpServer.ui_message;

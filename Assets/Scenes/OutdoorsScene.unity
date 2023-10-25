@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 4144.399, g: 3618.1157, b: 3592.0474, a: 1}
+  m_IndirectSpecularColor: {r: 4250.0825, g: 3817.5142, b: 4210.352, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -599,6 +599,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8790524354546057502, guid: 225dcc5b41eb153438a80775ddb1ac21,
+        type: 3}
+      propertyPath: forceVisualMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 140cb39890625594f9e1fa6f363a639b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -716,6 +721,31 @@ PrefabInstance:
         type: 3}
       propertyPath: 'labels.Array.data[4]'
       value: New Label_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3567296937957403295, guid: 6cf1329e25a1dbb4a96d0fbf19705085,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3567296937957403295, guid: 6cf1329e25a1dbb4a96d0fbf19705085,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3567296937957403295, guid: 6cf1329e25a1dbb4a96d0fbf19705085,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3567296937957403295, guid: 6cf1329e25a1dbb4a96d0fbf19705085,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3567296937957403295, guid: 6cf1329e25a1dbb4a96d0fbf19705085,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 6661787119179645616, guid: 6cf1329e25a1dbb4a96d0fbf19705085,
         type: 3}

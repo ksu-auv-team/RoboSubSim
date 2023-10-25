@@ -8,6 +8,7 @@ public class RobotForce : MonoBehaviour
     public float strength = 2.36f;
     public bool forceVisual = true;
     public Material forceVisualMaterial;
+    [HideInInspector]
     public Rigidbody m_rigidBody;
     const float KGF_TO_N = 9.80665f;
     const float MAX_FORCE = 2.36f*KGF_TO_N;

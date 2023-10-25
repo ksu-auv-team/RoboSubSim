@@ -79,8 +79,8 @@ public class SceneManagement : MonoBehaviour
     }
     public void configRobotParams(float mass, float volume, int robotID = 0, bool tcp = false){
             //GameObject robot = selectObject(ROBOT, robotID);
-            allRobots[robotID].controlScript.m_rigidBody.mass = mass;
-            allRobots[robotID].buoyScript.volumeDisplaced = volume;
+        allRobots[robotID].controlScript.m_rigidBody.mass = mass;
+        allRobots[robotID].buoyScript.volumeDisplaced = volume;
     }
     public void configRobotCamera(int height, int width, int mode, int robotID = 0){
         GameObject robot = selectObject(ROBOT, robotID);
@@ -180,6 +180,9 @@ public class SceneManagement : MonoBehaviour
             }
             tagNum+=1;
         }
+    }
+    public int getRobotCount(){
+        return allRobots.Count;
     }
     /// <summary>
     /// Scene Object Utility
