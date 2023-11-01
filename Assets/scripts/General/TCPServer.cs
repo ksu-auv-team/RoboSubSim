@@ -3,9 +3,90 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using System.Threading;
-
+using System.Collections.Generic;
+public struct CommandPacket{
+    public byte[] body;
+    public int body_counter;
+    public bool EscapeNextByte;
+    public int bodyLen;
+    private const byte ESCAPE = 255;
+    private const byte START = 253;
+    private const byte END = 254;
+    public SceneManagement sceneManagement;
+    public enum states : int {
+        Waiting = 0,
+        Reading = 1,
+    }
+    public states commandState;
+    public CommandPacket(int length, SceneManagement sceneM){
+        commandState = states.Waiting;
+        bodyLen = length;
+        body = new byte[bodyLen];
+        body_counter = 0;
+        EscapeNextByte = false;
+        sceneManagement = sceneM;
+    }
+    public bool processByte(byte data){
+        switch(commandState){
+            case states.Reading:
+                if (EscapeNextByte) {
+                    body[body_counter] = data;
+                    body_counter += 1;
+                    EscapeNextByte = false;
+                    break;
+                }
+                if (data == END) {return true;}
+                else if (data == ESCAPE) {EscapeNextByte = true; break;}
+                if (body_counter >= bodyLen){
+                    return true;
+                }
+                body[body_counter] = data;
+                body_counter += 1;
+                EscapeNextByte = false;
+                break;
+            case states.Waiting:
+                if (data == START){
+                    commandState = states.Reading;
+                }
+                break;
+            //case states.WaitProcess:
+            //    processCommand();
+            //    commandState = states.Processed;
+            //    break;
+        }
+        return false;
+    }
+    public void processCommand(){
+        
+    }
+    public void reset(){
+        System.Array.Clear(body, 0, bodyLen);
+        body_counter = 0;
+        EscapeNextByte = false;
+        commandState = states.Waiting;
+    }
+    public string ToString(){
+        return System.Text.Encoding.Default.GetString(body);
+    }
+    float[] ParseFloats(byte[] byteValues, int numFloats, int startIndex){
+        float[] floatValues = new float[numFloats];
+        int count = 0;
+        while (count < numFloats){
+            floatValues[count] = System.BitConverter.ToSingle(byteValues, startIndex);
+            startIndex += 4;
+            count += 1;
+        }
+        return floatValues;
+    }
+}
 public class TCPServer : MonoBehaviour
 {
+    List<string> possibleCommands = new List<string>{
+            // mimic control board commands
+            "RAW", "LOCAL", "BNO055P", "MS5837P", "BNO055R", "MS5837R",
+            // Other commands
+            "CAPTURE", "RESETS", "CAMCFG", "ROBSEL"
+        };
     SceneManagement sceneManagement;
     public string IPAddr = "127.0.0.1";
     public int port = -1;
@@ -20,13 +101,6 @@ public class TCPServer : MonoBehaviour
     //private RobotForce motor_script;
     //private RobotCamera camera_script;
     public string ui_message = "Closed";
-    private enum PortsID : int{
-        general = 0,
-        motors = 1,
-        imu = 2,
-        commands = 3,
-        other = 4,
-    }
     //private Thread threadMotors;
     //private Thread threadGyro;
     //private Thread threadImages;
@@ -35,14 +109,19 @@ public class TCPServer : MonoBehaviour
     //[HideInInspector]
     public bool runServer = false;
     private bool serverStarted = false;
+    private byte[] buffer;
+    List<CommandPacket> commandsPool = new List<CommandPacket>(64);
+    CommandPacket currentPacket;
     void Start()
     {
         sceneManagement = GetComponent<SceneManagement>();
+        currentPacket = new CommandPacket(256, sceneManagement);
+        buffer = new byte[10];
         //motor_script = GetComponent<RobotForce>();
         //imu_script = GetComponent<RobotIMU>();
         //camera_script = GetComponent<RobotCamera>();
         // Receive on a separate thread so Unity doesn't freeze waiting for data
-        threadGeneral = new Thread(() => GetData(port, PortsID.general));
+        threadGeneral = new Thread(() => GetData(port));
         //threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
         //threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
         //threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
@@ -64,14 +143,18 @@ public class TCPServer : MonoBehaviour
     }
     void OnDestroy(){
         //if (general){
-            threadGeneral.Abort();
+            runServer = false;
+            //threadGeneral.Abort();
         //}else{
         //    threadMotors.Abort();
         //    threadGyro.Abort();
         //    threadImages.Abort();
         //}
     }
-    void GetData(int port, PortsID id)
+    void OnApplicationQuit(){
+        runServer = false;
+    }
+    void GetData(int port)
     {
         if (port < 0){
             return;
@@ -93,7 +176,7 @@ public class TCPServer : MonoBehaviour
         TcpClient client = server.AcceptTcpClient();
 
         // TODO: FIND BETTER MESSAGE PROCESSING METHODS SO THIS NUMBER CAN BE AS LOW AS POSSIBLE
-        client.ReceiveBufferSize = 64;  
+        client.ReceiveBufferSize = 8;  
 
         NetworkStream nwStream = client.GetStream();
         ui_message = "Connected:"+IPAddr+":"+port;
@@ -102,7 +185,7 @@ public class TCPServer : MonoBehaviour
         bool running;
         while (runServer)
         {
-            running = Connection(client, nwStream, id);
+            running = Connection(client, nwStream);
         }
         Debug.Log("Port:" + port + ", closed on " + IPAddr);
         server.Stop();
@@ -111,136 +194,67 @@ public class TCPServer : MonoBehaviour
         
     }
 
-    bool Connection(TcpClient client, NetworkStream nwStream, PortsID id)
+    bool Connection(TcpClient client, NetworkStream nwStream)
     {
-        switch (id) {
-            // receivers
-            case PortsID.general:
-                if (currentTime > msPerTransmit){
-                    //Debug.Log(currentTime);
-                    ParseSendData(id, nwStream);
-                    currentTime = 0;
-                }
-                goto case PortsID.motors;
-            case PortsID.motors:
-            case PortsID.commands:
-                // Read data from the network stream
-                byte[] buffer = new byte[client.ReceiveBufferSize];
-                if (nwStream.DataAvailable){
-                    //print("1");
-                    int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
-                    print(bytesRead);
-                    //print("2");
-                    // Decode the bytes into a string
-                    string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    //print(dataReceived);
-                    // Make sure we're not getting an empty string
-                    dataReceived.Trim();
-                    if (dataReceived != null && dataReceived != "")
-                    {
-                    // Convert the received string of data to the format we are using
-                        ParseReceivedData(dataReceived, id);
-                    //nwStream.Write(buffer, 0, bytesRead);
-                    }
-                } else {
-                    //Debug.Log("No msg received");
-                }
-                
-                break;
-            // transmitters
-            case PortsID.imu:
-                Thread.Sleep(msPerTransmit);
-                ParseSendData(id, nwStream);
-                break;
-            
+        if (currentTime > msPerTransmit){
+            //Debug.Log(currentTime);
+            //ParseSendData(nwStream);
+            currentTime = 0;
         }
+        // Read data from the network stream
+        if (nwStream.DataAvailable){
+            int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+            //print(bytesRead);
+            ParseReceivedData(bytesRead);
+        }
+        else{
+            if (commandsPool.Count > 0){
+                commandsPool[commandsPool.Count-1].processCommand();
+                commandsPool.RemoveAt(commandsPool.Count-1);
+            }
+            if (commandsPool.Count > 256) {
+                print("TCP Command Pool Overflow");
+                commandsPool.Clear();
+            }
+            print("Pooled Commands: " + commandsPool.Count);
+        }
+        
+            //Debug.Log("No msg received");
         return true;
     }
-    void ParseSendData(PortsID id, NetworkStream nwStream){
-        byte[] imu_buf = new byte[24];
-        switch (id) {
-            case PortsID.general:
-                // attach 'I' to the end of imu buffer
-                imu_buf = new byte[26];
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes('I'), 0, imu_buf, 24, 2);
-                goto case PortsID.imu;
-            case PortsID.imu:
-                IMU imu = sceneManagement.getRobotIMU();
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        360-imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        360-imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        -imu.linearAccel.z), 0, imu_buf, 12, 4);
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu.linearAccel.x), 0, imu_buf, 16, 4);
-                System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                        imu.linearAccel.y), 0, imu_buf, 20, 4);
-                nwStream.Write(imu_buf,0,imu_buf.Length);
+    void ParseSendData(NetworkStream nwStream){
+        byte[] imu_buf = new byte[26];
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes('I'), 0, imu_buf, 24, 2);
+        IMU imu = sceneManagement.getRobotIMU();
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                360-imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                360-imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                -imu.linearAccel.z), 0, imu_buf, 12, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.linearAccel.x), 0, imu_buf, 16, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.linearAccel.y), 0, imu_buf, 20, 4);
+        nwStream.Write(imu_buf,0,imu_buf.Length);
                 //Debug.Log(imu.quaternion.eulerAngles);
                 //Debug.Log(System.BitConverter.IsLittleEndian);
-                break;
-        }
     }
     // Use-case specific function, need to re-write this to interpret whatever data is being sent
-    void ParseReceivedData(string dataString, PortsID id)
+    void ParseReceivedData(int bytesRead)
     {
-        //Debug.Log(dataString);
-        string [] packets = dataString.Split('|');
-        foreach (string packet in packets){
-            //print(packets.Length);
-            if (packet == "" || packet == null) {
-                continue;
+        int i = 0;
+        while (i < bytesRead){
+            if (currentPacket.processByte(buffer[i])){
+                print(currentPacket.ToString());
+                commandsPool.Add(currentPacket);
+                currentPacket.reset();
             }
-            // Split the elements into an array
-            string[] stringArray = packet.Split(',');
-            switch (id) {
-                case PortsID.general:
-                    string last_string = stringArray[stringArray.Length-1];
-                    if (last_string.Length <= 0) {
-                        break;
-                    }
-                    var endVal = stringArray[stringArray.Length-1][0];
-                    //Debug.Log(endVal);
-                    if (endVal == 'R' && stringArray.Length == 9 && stringArray[0] != "") {    // raw (individual motors)
-                        goto case PortsID.motors;
-                    }
-                    if (endVal == 'C' && stringArray.Length == 2 && stringArray[0] != "") {    // command
-                        goto case PortsID.commands;
-                    }
-                    if (endVal == 'O' && stringArray.Length == 7 && stringArray[0] != "") {    // local
-                        goto case PortsID.other;
-                    }
-                    break;
-                case PortsID.motors:
-                    sceneManagement.setMotorPower(
-                        float.Parse(stringArray[0]),
-                        float.Parse(stringArray[1]),
-                        float.Parse(stringArray[2]),
-                        float.Parse(stringArray[3]),
-                        float.Parse(stringArray[4]),
-                        float.Parse(stringArray[5]),
-                        float.Parse(stringArray[6]),
-                        float.Parse(stringArray[7]));
-                    break;
-                case PortsID.other:
-                    sceneManagement.setOtherControlPower(
-                        float.Parse(stringArray[0]),
-                        float.Parse(stringArray[1]),
-                        float.Parse(stringArray[2]),
-                        float.Parse(stringArray[3]),
-                        float.Parse(stringArray[4]),
-                        float.Parse(stringArray[5]));
-                    break;
-                case PortsID.commands:
-                    int command = int.Parse(stringArray[0]);
-                    sceneManagement.triggerCapture(command);
-                    break;
-            }
+            //print("received");
+            i += 1;
         }
-        return;
     }
 
     void startThread(){
@@ -256,8 +270,9 @@ public class TCPServer : MonoBehaviour
     }
     void stopThread(){
         //if (general) {
-            threadGeneral.Abort();
-            threadGeneral = new Thread(() => GetData(port, PortsID.general));
+            //threadGeneral.Abort();
+            runServer = false;
+            threadGeneral = new Thread(() => GetData(port));
         
         //} else {
         //    threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
