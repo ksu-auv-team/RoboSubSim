@@ -38,9 +38,9 @@ public class CommandPacket{
         sceneManagement = sceneM;
     }
     // send from this
-    public CommandPacket(SceneManagement sceneM, ushort id, byte[] header, byte[] data, byte[] crc){
+    public CommandPacket(SceneManagement sceneM, ushort id, byte[] header, byte[] data){
         commandState = states.Waiting;
-        bodyLen = 2 + header.Length + data.Length + crc.Length;
+        bodyLen = 2 + header.Length + data.Length + 2;
         body = new byte[bodyLen];
         
         byte[] id_bytes = System.BitConverter.GetBytes(id);
@@ -120,10 +120,12 @@ public class CommandPacket{
         }
         return false;
     }
-    public void processCommand(){
-        Debug.Log(ToString());
+    public byte processCommand(){
+        byte error_code = 0;
+        Debug.Log("Length: " + body.Length + "Bytes: " + ToString());
         //ParseFloats(body,1,0);
         //Debug.Log(ParseFloats(body,1,0)[0]);
+        return error_code;
     }
 
     public bool sendPacket(NetworkStream nwStream, int bytes_to_send){
@@ -179,10 +181,12 @@ public class CommandPacket{
 public class TCPServer : MonoBehaviour
 {
     readonly string[] POSSIBLE_COMMANDS = new string[] {
-            // mimic control board commands
+            // control board commands
             "RAW", "LOCAL", "BNO055P", "MS5837P", "BNO055R", "MS5837R",
             // Other commands
-            "CAPTURE", "RESETS", "CAMCFG", "ROBSEL"
+            "CAPTURE", "RESETS", "CAMCFG", "ROBOTSEL",
+            // acknowledge
+            "ACK"
         };
     Dictionary<string, byte[]> commandsHeader = new Dictionary<string, byte[]>();
     SceneManagement sceneManagement;
@@ -219,8 +223,8 @@ public class TCPServer : MonoBehaviour
         }
         Debug.Log(commandsHeader.Keys.Count);
         sceneManagement = GetComponent<SceneManagement>();
-        receiveLoadingPacket = new CommandPacket(256, sceneManagement);
-        sendLoadingPacket = new CommandPacket(256, sceneManagement);
+        receiveLoadingPacket = new CommandPacket(128, sceneManagement);
+        sendLoadingPacket = new CommandPacket(128, sceneManagement);
         buffer = new byte[10];
         threadGeneral = new Thread(() => GetData(port));
     }
@@ -305,7 +309,17 @@ public class TCPServer : MonoBehaviour
                     print("TCP Receive Command Pool Overflow");
                     receiveCommandsPool.RemoveRange(0, receiveCommandsPool.Count / 2);
                 }
-                receiveCommandsPool[receiveCommandsPool.Count-1].processCommand();
+                byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand();
+                if (error_code < 5) {
+                    sendCommandsPool.Add(new CommandPacket(sceneManagement, 
+                                                            id: 0,
+                                                            header: commandsHeader["ACK"], 
+                                                            data: new byte[] {
+                                                                receiveCommandsPool[receiveCommandsPool.Count-1].body[0],
+                                                                receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
+                                                                error_code
+                                                            }));
+                }
                 receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
             }
             // process the earlies send command (Last in last out)
@@ -346,8 +360,8 @@ public class TCPServer : MonoBehaviour
         if (sendCommandsPool.Count < 16){
             sendLoadingPacket = new CommandPacket(sceneManagement, id: 10, 
                                                                 header: commandsHeader["BNO055R"], 
-                                                                data: new byte[] {0},//imu_buf, 
-                                                                crc: new byte[] {0,0});
+                                                                data: new byte[] {0}//imu_buf
+                                                                );
             CommandPacket newPacket = new CommandPacket(sceneManagement, sendLoadingPacket.body, sendLoadingPacket.bodyLen);
             sendCommandsPool.Add(newPacket);
         }
