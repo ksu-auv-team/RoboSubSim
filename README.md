@@ -10,7 +10,8 @@ This is a WIP project aimed at simulating underwater environments for autonomous
 * Download Unity Hub and get a free license
 * Add this project to Unity Hub
 * When launching it will ask you to get editor version `2023.1.8f1`, you need to install this version (higher might work)
-* It should be good to go now, the first launch will take a while. 
+* The first launch will take a while, on launch go to `Assets/Scenes` and load the `StartScene` for editor mode.
+* It should be good to go now. 
 * Tested with Windows 11 and Ubuntu22.04. The editor mode works in Ubuntu, but the build version will crash after resetting the scene several times (last tested)
 
 ### Note
