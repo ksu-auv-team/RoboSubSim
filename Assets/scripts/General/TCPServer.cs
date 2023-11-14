@@ -133,20 +133,36 @@ public class CommandPacket{
         return true;
     }
     public byte processCommand(Dictionary<string, byte[]> commands){
+        byte error_code = 0;
+        Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
+
         foreach (KeyValuePair<string, byte[]> command in commands) {
             if (isCommand(command.Value)) {
                 Debug.Log("Received Command: " + command.Key);
-                if (System.String.Equals(command.Key, "RAW", System.StringComparison.Ordinal)){
-                    float[] motor_power = ParseFloats(body, 8, 5);
-                    Debug.Log("Vals: " + string.Join(",", motor_power));
-                    sceneManagement.setMotorPower(motor_power[0],motor_power[1],motor_power[2],motor_power[3],
-                                                motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
+                switch(command.Key){
+                    case "RAW":
+                        float[] motor_power = ParseFloats(body, 8, 5);
+                        Debug.Log("Vals: " + string.Join(",", motor_power));
+                        sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
+                                                        motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
+                        break;
+                    case "LOCAL":
+                    case "GLOBAL":
+                    case "RELDOF":
+                    case "BNO055P":
+                    case "MS5837P":
+                    case "WDGF":
+                    case "BNO055R":
+                    case "MS5837R":
+                    case "CAPTUREU":
+                    case "ROBOTSELU":
+                    default:
+                        Debug.Log("Unimplemented command: " + command.Key);
+                        break;
                 }
-                
             }
         }
-        byte error_code = 0;
-        Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
+        
         //ParseFloats(body,1,0);
         //Debug.Log(ParseFloats(body,1,0)[0]);
         return error_code;
@@ -206,9 +222,9 @@ public class TCPServer : MonoBehaviour
 {
     readonly string[] POSSIBLE_COMMANDS = new string[] {
             // control board commands
-            "RAW", "LOCAL", "BNO055P", "MS5837P", "BNO055R", "MS5837R", "WDGS",
+            "RAW", "LOCAL", "GLOBAL", "RELDOF", "BNO055P", "MS5837P", "WDGS", "BNO055R", "MS5837R", 
             // Other commands
-            "CAPTURE", "RESETS", "CAMCFG", "ROBOTSEL",
+            "CAPTUREU", "RESETU", "CAMCFGU", "ROBOTSELU",
             // acknowledge
             "ACK"
         };
