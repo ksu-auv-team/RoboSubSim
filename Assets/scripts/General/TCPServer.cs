@@ -49,7 +49,7 @@ public class CommandPacket{
         System.Buffer.BlockCopy(header, 0, body, 2, header.Length);
         System.Buffer.BlockCopy(data, 0, body, 2 + header.Length, data.Length);
         System.Buffer.BlockCopy(crc_itt16_false(2 + header.Length + data.Length), 0, body, 2 + header.Length + data.Length, 2);
-        Debug.Log("New Send Packet Created");
+        //Debug.Log("New Send Packet Created");
         body_counter = 0;
         EscapeNextByte = false;
         sceneManagement = sceneM;
@@ -92,7 +92,9 @@ public class CommandPacket{
                     else {
                         //Debug.Log("Count: " + body_counter);
                         byte[] expected_crc = crc_itt16_false(body_counter-2);
-                        Debug.Log("Expected CRC: " + System.String.Join(',', expected_crc));
+                        if (expected_crc[0] != body[body_counter-2] && expected_crc[1] != body[body_counter-1]) {
+                            Debug.Log("Expected CRC: " + System.String.Join(',', expected_crc));
+                        }
                         return true;
                     }
                     break;
@@ -120,9 +122,31 @@ public class CommandPacket{
         }
         return false;
     }
-    public byte processCommand(){
+    private bool isCommand(byte[] command){
+        int index = 0;
+        while (index < command.Length) {
+            if (body[index + 2] != command[index]){
+                return false;
+            }
+            index += 1;
+        }
+        return true;
+    }
+    public byte processCommand(Dictionary<string, byte[]> commands){
+        foreach (KeyValuePair<string, byte[]> command in commands) {
+            if (isCommand(command.Value)) {
+                Debug.Log("Received Command: " + command.Key);
+                if (System.String.Equals(command.Key, "RAW", System.StringComparison.Ordinal)){
+                    float[] motor_power = ParseFloats(body, 8, 5);
+                    Debug.Log("Vals: " + string.Join(",", motor_power));
+                    sceneManagement.setMotorPower(motor_power[0],motor_power[1],motor_power[2],motor_power[3],
+                                                motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
+                }
+                
+            }
+        }
         byte error_code = 0;
-        Debug.Log("Length: " + body.Length + "Bytes: " + ToString());
+        Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
         //ParseFloats(body,1,0);
         //Debug.Log(ParseFloats(body,1,0)[0]);
         return error_code;
@@ -148,7 +172,7 @@ public class CommandPacket{
 
             body_counter += 1;
             if (body_counter == body.Length) {
-                Debug.Log("Sent: " + ToString());
+                //Debug.Log("Sent: " + ToString());
                 nwStream.Write(new byte[] {END}, 0 ,1);
                 //Debug.Log("Wrote END");
                 return true;
@@ -182,7 +206,7 @@ public class TCPServer : MonoBehaviour
 {
     readonly string[] POSSIBLE_COMMANDS = new string[] {
             // control board commands
-            "RAW", "LOCAL", "BNO055P", "MS5837P", "BNO055R", "MS5837R",
+            "RAW", "LOCAL", "BNO055P", "MS5837P", "BNO055R", "MS5837R", "WDGS",
             // Other commands
             "CAPTURE", "RESETS", "CAMCFG", "ROBOTSEL",
             // acknowledge
@@ -309,7 +333,7 @@ public class TCPServer : MonoBehaviour
                     print("TCP Receive Command Pool Overflow");
                     receiveCommandsPool.RemoveRange(0, receiveCommandsPool.Count / 2);
                 }
-                byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand();
+                byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
                 if (error_code < 5) {
                     sendCommandsPool.Add(new CommandPacket(sceneManagement, 
                                                             id: 0,
@@ -358,9 +382,15 @@ public class TCPServer : MonoBehaviour
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                 imu.linearAccel.y), 0, imu_buf, 20, 4);
         if (sendCommandsPool.Count < 16){
+            //sendLoadingPacket = new CommandPacket(sceneManagement, id: 10, 
+            //                                                    header: commandsHeader["BNO055R"], 
+            //                                                    data: new byte[] {0}//imu_buf
+            //                                                    );
+            //CommandPacket newPacket = new CommandPacket(sceneManagement, sendLoadingPacket.body, sendLoadingPacket.bodyLen);
+            //sendCommandsPool.Add(newPacket);
             sendLoadingPacket = new CommandPacket(sceneManagement, id: 10, 
-                                                                header: commandsHeader["BNO055R"], 
-                                                                data: new byte[] {0}//imu_buf
+                                                                header: commandsHeader["WDGS"], 
+                                                                data: new byte[] {1}//imu_buf
                                                                 );
             CommandPacket newPacket = new CommandPacket(sceneManagement, sendLoadingPacket.body, sendLoadingPacket.bodyLen);
             sendCommandsPool.Add(newPacket);
