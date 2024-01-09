@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 4250.0825, g: 3817.5142, b: 4210.352, a: 1}
+  m_IndirectSpecularColor: {r: 4299.93, g: 3900.8267, b: 4412.7114, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -216,6 +216,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5102322436314122177, guid: b70c9d58957517d41bf4a01521bd7e9f,
+        type: 3}
+      propertyPath: m_TagString
+      value: WaterColor
       objectReference: {fileID: 0}
     - target: {fileID: 7572871615336955953, guid: b70c9d58957517d41bf4a01521bd7e9f,
         type: 3}

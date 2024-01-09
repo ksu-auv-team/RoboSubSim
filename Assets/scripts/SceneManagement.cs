@@ -250,5 +250,10 @@ public class SceneManagement : MonoBehaviour
         int tagID = System.Array.IndexOf(tagNames, tag);
         replaceObjectInArray(newObject, tagID, objectID);
     }
-
+    public void poolColorRandom(){
+        var waterBodies = GameObject.FindGameObjectsWithTag("WaterColor");
+        foreach(GameObject waterBody in waterBodies){
+            waterBody.GetComponent<WaterRandomization>().RandomizeWater();
+        }
+    }
 }

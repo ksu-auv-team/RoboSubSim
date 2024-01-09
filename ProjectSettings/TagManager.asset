@@ -10,6 +10,7 @@ TagManager:
   - Pool
   - Environment
   - SceneManagement
+  - WaterColor
   layers:
   - Default
   - TransparentFX

@@ -118,7 +118,9 @@ public class Robot_UI : MonoBehaviour
         sceneManagement.sceneSelect = poolModeDropdown.value;
         sceneManagement.ResetScene();
     }
-
+    public void randomizePoolWaterColor(){
+        sceneManagement.poolColorRandom();
+    }
 
     // Update is called once per frame
     void Update()
