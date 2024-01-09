@@ -7,9 +7,12 @@ public class Simple_UI : MonoBehaviour
 {
     public Robot_UI complex_ui_script;
     public TMPro.TMP_Text FPS;
+    SceneManagement sceneManagement;
+    void Start(){
+        sceneManagement = GameObject.FindGameObjectWithTag("SceneManagement").GetComponent<SceneManagement>();
+    }
     public void ResetScene(){
-        SceneManager.LoadScene("Scenes/OutdoorsScene");
-        complex_ui_script.refresh();
+        sceneManagement.sceneRefresh = true;
     }
     void Update(){
         FPS.text = "FPS: " + (1 / Time.smoothDeltaTime).ToString("0.0");

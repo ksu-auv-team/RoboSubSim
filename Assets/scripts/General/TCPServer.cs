@@ -49,7 +49,7 @@ public class CommandPacket{
         System.Buffer.BlockCopy(header, 0, body, 2, header.Length);
         System.Buffer.BlockCopy(data, 0, body, 2 + header.Length, data.Length);
         System.Buffer.BlockCopy(crc_itt16_false(2 + header.Length + data.Length), 0, body, 2 + header.Length + data.Length, 2);
-        //Debug.Log("New Send Packet Created");
+        Debug.Log("New Send Packet Created");
         body_counter = 0;
         EscapeNextByte = false;
         sceneManagement = sceneM;
@@ -75,9 +75,9 @@ public class CommandPacket{
         return crc_bytes;
     }
     public bool processByte(byte data){
+        Debug.Log("Byte: " + data + ", Count: " + body_counter + ", bodyLen: " + bodyLen + ", Escape: " + EscapeNextByte);
         switch(commandState){
             case states.Reading:
-                //Debug.Log("Byte: " + data + ", Count: " + body_counter + ", bodyLen: " + bodyLen + ", Escape: " + EscapeNextByte);
                 // buffer overflow (increase bodyLen or endByte missed)
                 if (body_counter >= bodyLen){
                     return true;
@@ -147,19 +147,35 @@ public class CommandPacket{
                                                         motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
                         break;
                     case "LOCAL":
+                        goto default;
                     case "GLOBAL":
+                        goto default;
                     case "RELDOF":
+                        goto default;
                     case "BNO055P":
+                        goto default;
                     case "MS5837P":
+                        goto default;
                     case "WDGF":
+                        goto default;
                     case "BNO055R":
+                        goto default;
                     case "MS5837R":
+                        goto default;
                     case "CAPTUREU":
+                        goto default;
+                    case "RESETU":
+                        sceneManagement.sceneSelect = body[8];
+                        sceneManagement.sceneRefresh = true;
+                        break;
                     case "ROBOTSELU":
+                        goto default;
                     default:
                         Debug.Log("Unimplemented command: " + command.Key);
                         break;
                 }
+            } else {
+                Debug.Log("Unknown Command. Bytes: " + ToString());
             }
         }
         
@@ -359,6 +375,10 @@ public class TCPServer : MonoBehaviour
                                                                 receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
                                                                 error_code
                                                             }));
+                    sendCommandsPool.Add(new CommandPacket(sceneManagement, id: 10, 
+                                                                header: commandsHeader["WDGS"], 
+                                                                data: new byte[] {1}//imu_buf
+                                                                ));
                 }
                 receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
             }
@@ -383,34 +403,29 @@ public class TCPServer : MonoBehaviour
         return true;
     }
     void ParseSendData(NetworkStream nwStream){
-        byte[] imu_buf = new byte[24];
-        IMU imu = sceneManagement.getRobotIMU();
-        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
-        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                360-imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
-        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                360-imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
-        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                -imu.linearAccel.z), 0, imu_buf, 12, 4);
-        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.linearAccel.x), 0, imu_buf, 16, 4);
-        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.linearAccel.y), 0, imu_buf, 20, 4);
-        if (sendCommandsPool.Count < 16){
+        //byte[] imu_buf = new byte[24];
+        //IMU imu = sceneManagement.getRobotIMU();
+        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+        //                        imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
+        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+        //                        360-imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
+        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+        //                        360-imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
+        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+        //                        -imu.linearAccel.z), 0, imu_buf, 12, 4);
+        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+        //                        imu.linearAccel.x), 0, imu_buf, 16, 4);
+        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+        //                        imu.linearAccel.y), 0, imu_buf, 20, 4);
+        //if (sendCommandsPool.Count < 16){
             //sendLoadingPacket = new CommandPacket(sceneManagement, id: 10, 
             //                                                    header: commandsHeader["BNO055R"], 
             //                                                    data: new byte[] {0}//imu_buf
             //                                                    );
             //CommandPacket newPacket = new CommandPacket(sceneManagement, sendLoadingPacket.body, sendLoadingPacket.bodyLen);
             //sendCommandsPool.Add(newPacket);
-            sendLoadingPacket = new CommandPacket(sceneManagement, id: 10, 
-                                                                header: commandsHeader["WDGS"], 
-                                                                data: new byte[] {1}//imu_buf
-                                                                );
-            CommandPacket newPacket = new CommandPacket(sceneManagement, sendLoadingPacket.body, sendLoadingPacket.bodyLen);
-            sendCommandsPool.Add(newPacket);
-        }
+            
+        //}
         //nwStream.Write(imu_buf,0,imu_buf.Length);
                 //Debug.Log(imu.quaternion.eulerAngles);
                 //Debug.Log(System.BitConverter.IsLittleEndian);

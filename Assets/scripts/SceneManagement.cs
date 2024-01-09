@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 /// <summary>
 /// This script handles all objects (with matching tagNames) in the scene so no calls to individual script should be needed
 /// Therefore it grabs all objects in the scene and has the ability to copy/remove objects (that exists) in the scene
 /// </summary>
-public struct TCPRobot{
+public class TCPRobot{
     public GameObject tcpObject;
     public RobotCamera cameraScript;
     public RobotForce controlScript;
@@ -23,6 +24,7 @@ public struct TCPRobot{
 [RequireComponent (typeof(TCPServer))]
 public class SceneManagement : MonoBehaviour
 {
+    public Robot_UI ui_script;
     const int ROBOT = 0;
     string[] tagNames = {"Robot", "Pool", "2023Objective", "Environment"};
     List<GameObject[]> gameObjects = new List<GameObject[]>();
@@ -34,6 +36,23 @@ public class SceneManagement : MonoBehaviour
     public bool tcpObjectChanged;
     public int tcpTagSelect;
     public int tcpObjectSelect;
+    public string[] sceneLists = new string[] { "Scenes/LobbyScene",
+                                                "Scenes/OutdoorsScene",
+                                                "Scenes/OutdoorsScene"};
+    public bool sceneRefresh = false;
+    public int sceneSelect = 0;
+    public IEnumerator ResetSceneCoroutine(){
+        AsyncOperation asyncLoad = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneLists[sceneSelect]);
+        while(!asyncLoad.isDone){
+            yield return null;
+        }
+
+        ui_script.refresh();
+    }
+    public void ResetScene(){
+        StartCoroutine(ResetSceneCoroutine());
+        sceneRefresh = false;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -48,6 +67,9 @@ public class SceneManagement : MonoBehaviour
                 tcpRobot.setNewRobot(gameObject);
             }
             tcpObjectChanged = false;
+        }
+        if (sceneRefresh) {
+            ResetScene();
         }
     }
     /// <summary>
@@ -65,6 +87,11 @@ public class SceneManagement : MonoBehaviour
         tcpServer.port = port;
         tcpServer.runServer = runServer;
         tcpServer.msPerTransmit = msPerTransmit;
+
+        ui_script.IPaddr.text = IPAddr;
+        ui_script.Port.text = port.ToString();
+        ui_script.runServer.isOn = runServer;
+        ui_script.SendFreq.text = msPerTransmit.ToString();
     }
     /// <summary>
     /// Robot Dynamics Configurations
@@ -76,11 +103,16 @@ public class SceneManagement : MonoBehaviour
         GameObject robot = selectObject(ROBOT, robotID);
         RobotForce script = allRobots[robotID].controlScript;
         script.controlMethod = mode;
+
+        ui_script.controlModeDropdown.value = (int)mode;
     }
     public void configRobotParams(float mass, float volume, int robotID = 0, bool tcp = false){
             //GameObject robot = selectObject(ROBOT, robotID);
         allRobots[robotID].controlScript.m_rigidBody.mass = mass;
         allRobots[robotID].buoyScript.volumeDisplaced = volume;
+    
+        ui_script.Mass.text = mass.ToString();
+        ui_script.Volume.text = volume.ToString();
     }
     public void configRobotCamera(int height, int width, int mode, int robotID = 0){
         GameObject robot = selectObject(ROBOT, robotID);
@@ -103,6 +135,10 @@ public class SceneManagement : MonoBehaviour
              
         }
         script.configCommand(mode);
+
+        ui_script.ImageHeight.text = height.ToString();
+        ui_script.ImageWidth.text = width.ToString();
+        ui_script.cameraModeDropdown.value = mode;
     }
     /// <summary>
     /// Robot Actions

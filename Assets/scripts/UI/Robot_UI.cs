@@ -56,7 +56,7 @@ public class Robot_UI : MonoBehaviour
         if (sceneManagement.getRobotCount() > 0){
             configRobotParams();
             configControlMode();
-            configCamera();            
+            configCamera();
         }
     }
     public void changeTCPMessage(){
@@ -109,6 +109,17 @@ public class Robot_UI : MonoBehaviour
         //}
         //camera_script.configCommand(cameraModeDropdown.value);
     }
+    
+    /// <summary>
+    /// Debug Section
+    /// </summary>
+    public TMPro.TMP_Dropdown poolModeDropdown;
+    public void configPool(){
+        sceneManagement.sceneSelect = poolModeDropdown.value;
+        sceneManagement.ResetScene();
+    }
+
+
     // Update is called once per frame
     void Update()
     {

@@ -10,9 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 7213529781222318982}
   - component: {fileID: 2629267781029906934}
+  - component: {fileID: 1467452071275341564}
+  - component: {fileID: 3607302369067931935}
   m_Layer: 0
   m_Name: SceneManagement
-  m_TagString: Untagged
+  m_TagString: SceneManagement
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -42,5 +44,45 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 19926d46036fb364fba35de258c02f96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ui_script: {fileID: 0}
+  tcpServer: {fileID: 0}
+  tcpObjectChanged: 0
+  tcpTagSelect: 0
+  tcpObjectSelect: 0
+  sceneLists:
+  - Scenes/LobbyScene
+  - Scenes/OutdoorsScene
+  - Scenes/OutdoorsScene
+  sceneRefresh: 0
+  sceneSelect: 0
+--- !u!114 &1467452071275341564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2626829705743676056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2d169406667a7449a5d6940174c9cca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IPAddr: 127.0.0.1
+  port: -1
+  msPerTransmit: 100
+  ui_message: Closed
+  runServer: 0
+--- !u!114 &3607302369067931935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2626829705743676056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b69705b98845ca89554a7c92bceaec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
