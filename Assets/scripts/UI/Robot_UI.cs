@@ -121,7 +121,18 @@ public class Robot_UI : MonoBehaviour
     public void randomizePoolWaterColor(){
         sceneManagement.poolColorRandom();
     }
-
+    public Slider brightnessSlider;
+    public Slider bluenessSlider;
+    public Slider greennessSlider;
+    public void setPoolWaterColor(){
+        sceneManagement.setPoolWaterColor(  (int)(bluenessSlider.value * 255),
+                                            (int)(greennessSlider.value * 255),
+                                            brightnessSlider.value);
+    }
+    public Toggle physicsOnToggle;
+    public void toggleWorldPhysics(){
+        sceneManagement.togglePhysics(physicsOnToggle.isOn);
+    }
     // Update is called once per frame
     void Update()
     {

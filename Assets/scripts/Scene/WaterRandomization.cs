@@ -42,15 +42,18 @@ public class WaterRandomization : MonoBehaviour
         int sum_color = Random.Range(BG_SUM_MIN, BG_SUM_MAX);
         int blue = Random.Range(BG_SUM_MIN/2, BG_MAX);
         int green = sum_color - blue;
-        waterScript.scatteringColor.b = blue/255.0f;
-        waterScript.scatteringColor.g = green/255.0f;
         float brightness = Random.Range(0.3f, 1.0f);
-        waterScript.scatteringColor *= brightness;
+        SetWaterColor(blue, green, brightness);
         //waterScript.scatteringColor.a = 0.35f;
         waterColorChanged = true;
     }
     void RandomVisibility(){
         waterScript.absorptionDistance = centerVisibility * Random.Range(0.9f,1.1f); // surface visiblility (meters)
         waterScript.absorptionDistanceMultiplier = multiplierVisibility * Random.Range(0.9f,1.1f); // underwater visibility (multiplier of surface)
+    }
+    public void SetWaterColor(int blue, int green, float brightness){
+        waterScript.scatteringColor.b = blue/255.0f;
+        waterScript.scatteringColor.g = green/255.0f;
+        waterScript.scatteringColor *= brightness;
     }
 }
