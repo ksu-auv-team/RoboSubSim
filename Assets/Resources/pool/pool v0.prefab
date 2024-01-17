@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 7572871615336955953}
   m_Layer: 0
   m_Name: Pool
-  m_TagString: Untagged
+  m_TagString: WaterColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -188,7 +188,7 @@ MonoBehaviour:
   smoothnessFadeDistance: 500
   refractionColor: {r: 0.45641106, g: 0.5149178, b: 0.5143361, a: 1}
   maxRefractionDistance: 3.5
-  absorptionDistance: 7
+  absorptionDistance: 5
   scatteringColor: {r: 0.04518618, g: 0.08021983, b: 0.18782076, a: 1}
   ambientScattering: 0
   heightScattering: 1
@@ -216,7 +216,7 @@ MonoBehaviour:
   volumeDepth: 50
   volumeHeight: 0
   volumePrority: 1
-  absorptionDistanceMultiplier: 1.5
+  absorptionDistanceMultiplier: 2.5
   colorPyramidOffset: 1
   underWaterAmbientProbeContribution: 1
   underWaterScatteringColorMode: 0
@@ -329,7 +329,6 @@ MonoBehaviour:
   waterScript: {fileID: 866070171036112511}
   centerVisibility: 5
   multiplierVisibility: 2.5
-  waterColorChanged: 0
 --- !u!1 &8606220386771760332
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,7 +379,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -399,7 +398,7 @@ MonoBehaviour:
   m_IsGlobal: 0
   priority: 0
   blendDistance: 1
-  weight: 1
+  weight: 0.8
   sharedProfile: {fileID: 11400000, guid: 155dc378581a20f4c8dea6431a9bc923, type: 2}
 --- !u!1001 &928820316444510555
 PrefabInstance:

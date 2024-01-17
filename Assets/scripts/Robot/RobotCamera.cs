@@ -259,9 +259,9 @@ public class RobotCamera : MonoBehaviour
     void OnGUI(){
         if (ShowGUI) {
             var button_rect = new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight/20, mainCamera.pixelWidth/4, 40);
-            if (GUI.Button(button_rect, "Space to capture, fps:" + (int)(1.0f / Time.smoothDeltaTime))){
-                renderState = renderStatesEnum.PreRender;
-            }
+            //if (GUI.Button(button_rect, "Space to capture, fps:" + (int)(1.0f / Time.smoothDeltaTime))){
+            //    renderState = renderStatesEnum.PreRender;
+            //}
             //Debug.Log(GUI.transform);
             //Debug.Log(Camera.main.name);
             GUI.Label(new Rect(mainCamera.pixelWidth/20, mainCamera.pixelHeight-50, mainCamera.pixelWidth/2, 40), "Save to\n" + Application.persistentDataPath);

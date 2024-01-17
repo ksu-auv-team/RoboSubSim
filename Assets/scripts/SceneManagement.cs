@@ -256,4 +256,7 @@ public class SceneManagement : MonoBehaviour
             waterBody.GetComponent<WaterRandomization>().RandomizeWater();
         }
     }
+    public void setDisplayCamera(bool ShowGUI){
+        allRobots[0].cameraScript.ShowGUI = ShowGUI;
+    }
 }

@@ -121,6 +121,19 @@ public class Robot_UI : MonoBehaviour
     public void randomizePoolWaterColor(){
         sceneManagement.poolColorRandom();
     }
+    public TMPro.TMP_Dropdown displayCameraDropdown;
+    public void configDisplayCamera(){
+        switch (displayCameraDropdown.value) {
+            case 0:
+                sceneManagement.setDisplayCamera(false);
+                break;
+            case 1:
+                sceneManagement.setDisplayCamera(true);
+                break;
+            default:
+                break;
+        }
+    }
 
     // Update is called once per frame
     void Update()

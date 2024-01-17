@@ -176,8 +176,8 @@ Rigidbody:
   m_GameObject: {fileID: 1196306731892029154}
   serializedVersion: 4
   m_Mass: 32
-  m_Drag: 2
-  m_AngularDrag: 2
+  m_Drag: 3
+  m_AngularDrag: 3
   m_CenterOfMass: {x: 0, y: -0.03, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -230,8 +230,8 @@ MonoBehaviour:
   accelNoise: 150
   accelNoiseDrift: 0
   avgWindow: 0.01
-  gyroNoise: 0.1
-  gyroNoiseDrift: 1.5
+  gyroNoise: 0
+  gyroNoiseDrift: 0
 --- !u!114 &4733229795996780093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,10 +280,10 @@ MonoBehaviour:
   - 0
   - 0
   - 0
-  - 0
-  - 0
-  - 0
-  - 0
+  - -0.5
+  - -0.5
+  - -0.5
+  - -0.5
   other_control:
   - 0
   - 0
@@ -291,7 +291,7 @@ MonoBehaviour:
   - 0
   - 0
   - 0
-  controlMethod: 0
+  controlMethod: 1
 --- !u!114 &7325955720987588687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,10 +311,10 @@ MonoBehaviour:
   downPerceptionCameraObject: {fileID: 6113211161798131154}
   frontCounter: 0
   downCounter: 0
-  renderFramesCount: 1
+  renderFramesCount: 2
   generateData: 1
   imgWidth: 800
-  imgHeight: 6
+  imgHeight: 600
   frontCamFolderName: FrontCam
   downCamFolderName: DownCam
   ShowGUI: 0
@@ -735,15 +735,15 @@ Camera:
   m_GateFitMode: 1
   m_FOVAxisMode: 0
   m_Iso: 200
-  m_ShutterSpeed: 0.008333334
+  m_ShutterSpeed: 0.033333335
   m_Aperture: 16
   m_FocusDistance: 1
-  m_FocalLength: 4.6916113
+  m_FocalLength: 0.9093267
   m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
+  m_Curvature: {x: 2.3833992, y: 11.383399}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 10.16, y: 7.2}
+  m_SensorSize: {x: 5.6, y: 3.15}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -753,16 +753,16 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 75
+  field of view: 120.00001
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 2
+  m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 0
@@ -1016,15 +1016,15 @@ Camera:
   m_GateFitMode: 1
   m_FOVAxisMode: 0
   m_Iso: 200
-  m_ShutterSpeed: 0.008333334
+  m_ShutterSpeed: 0.033333335
   m_Aperture: 16
   m_FocusDistance: 1
-  m_FocalLength: 4.6916113
+  m_FocalLength: 0.9093267
   m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
+  m_Curvature: {x: 2.3833992, y: 11.383399}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 10.16, y: 7.2}
+  m_SensorSize: {x: 5.6, y: 3.15}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -1034,7 +1034,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 75
+  field of view: 120.00001
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -1043,7 +1043,7 @@ Camera:
     m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 1
+  m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 0
@@ -1296,15 +1296,15 @@ Camera:
   m_GateFitMode: 1
   m_FOVAxisMode: 0
   m_Iso: 200
-  m_ShutterSpeed: 0.008333334
+  m_ShutterSpeed: 0.033333335
   m_Aperture: 16
   m_FocusDistance: 1
-  m_FocalLength: 4.6916113
+  m_FocalLength: 0.9093267
   m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
+  m_Curvature: {x: 2.3833992, y: 11.383399}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 10.16, y: 7.2}
+  m_SensorSize: {x: 5.6, y: 3.15}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -1314,13 +1314,13 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 75
+  field of view: 120.00001
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 2
@@ -2056,7 +2056,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.20392159, g: 0.40784317, b: 0.3254902, a: 0.44705883}
+      maxColor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 0.3529412}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -6802,7 +6802,7 @@ MonoBehaviour:
   xrRendering: 1
   fullscreenPassthrough: 0
   allowDynamicResolution: 0
-  customRenderingSettings: 0
+  customRenderingSettings: 1
   invertFaceCulling: 0
   probeLayerMask:
     serializedVersion: 2
@@ -6822,8 +6822,8 @@ MonoBehaviour:
   materialMipBias: 0
   m_RenderingPathCustomFrameSettings:
     bitDatas:
-      data1: 5770166122053453
-      data2: 13799030890350739480
+      data1: 5770166122020685
+      data2: 13799030890348642328
     lodBias: 1
     lodBiasMode: 0
     lodBiasQualityLevel: 0
@@ -6838,7 +6838,7 @@ MonoBehaviour:
     materialQuality: 0
   renderingPathCustomFrameSettingsOverrideMask:
     mask:
-      data1: 0
+      data1: 32768
       data2: 0
   defaultFrameSettings: 0
   m_Version: 9
@@ -7099,15 +7099,15 @@ Camera:
   m_GateFitMode: 1
   m_FOVAxisMode: 0
   m_Iso: 200
-  m_ShutterSpeed: 0.008333334
+  m_ShutterSpeed: 0.033333335
   m_Aperture: 16
   m_FocusDistance: 1
-  m_FocalLength: 4.6916113
+  m_FocalLength: 0.9093267
   m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
+  m_Curvature: {x: 2.3833992, y: 11.383399}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 10.16, y: 7.2}
+  m_SensorSize: {x: 5.6, y: 3.15}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -7117,16 +7117,16 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 75
+  field of view: 120.00001
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 4
+  m_TargetDisplay: 1
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 0

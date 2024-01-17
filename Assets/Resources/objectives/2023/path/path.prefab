@@ -185,7 +185,7 @@ MonoBehaviour:
   waterDensity: 1.025
   volumeDisplaced: 1
   forceVisual: 0
-  forceVisualMaterial: {fileID: 0}
+  forceVisualMaterial: {fileID: 2100000, guid: 140cb39890625594f9e1fa6f363a639b, type: 2}
   underwater: 0
 --- !u!1 &5738116187546727705
 GameObject:
