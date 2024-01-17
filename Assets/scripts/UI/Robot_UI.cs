@@ -121,7 +121,18 @@ public class Robot_UI : MonoBehaviour
     public void randomizePoolWaterColor(){
         sceneManagement.poolColorRandom();
     }
-    public TMPro.TMP_Dropdown displayCameraDropdown;
+    public Slider brightnessSlider;
+    public Slider bluenessSlider;
+    public Slider greennessSlider;
+    public void setPoolWaterColor(){
+        sceneManagement.setPoolWaterColor(  (int)(bluenessSlider.value * 255),
+                                            (int)(greennessSlider.value * 255),
+                                            brightnessSlider.value);
+    }
+    public Toggle physicsOnToggle;
+    public void toggleWorldPhysics(){
+        sceneManagement.togglePhysics(physicsOnToggle.isOn);
+    }    public TMPro.TMP_Dropdown displayCameraDropdown;
     public void configDisplayCamera(){
         switch (displayCameraDropdown.value) {
             case 0:

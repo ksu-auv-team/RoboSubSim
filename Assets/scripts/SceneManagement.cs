@@ -256,6 +256,19 @@ public class SceneManagement : MonoBehaviour
             waterBody.GetComponent<WaterRandomization>().RandomizeWater();
         }
     }
+    public void setPoolWaterColor(int blue, int green, float brightness){
+        var waterBodies = GameObject.FindGameObjectsWithTag("WaterColor");
+        foreach(GameObject waterBody in waterBodies){
+            waterBody.GetComponent<WaterRandomization>().SetWaterColor(blue, green, brightness);
+        }
+    }
+    
+    public void togglePhysics(bool On){
+        Rigidbody[] allRigidBodies = GameObject.FindObjectsByType<Rigidbody>(FindObjectsSortMode.None);
+        foreach(Rigidbody rigidbody in allRigidBodies){
+            rigidbody.isKinematic = On;
+        }
+    }
     public void setDisplayCamera(bool ShowGUI){
         allRobots[0].cameraScript.ShowGUI = ShowGUI;
     }
