@@ -17,6 +17,7 @@ public class Robot_UI : MonoBehaviour
     public TMPro.TMP_InputField SendFreq;
     public TMPro.TMP_Text TCPMessage;
     public Toggle runServer;
+    public Toggle runSimCB;
     public TMPro.TMP_Dropdown controlModeDropdown;
     public TMPro.TMP_InputField Mass;
     public TMPro.TMP_InputField Volume;
@@ -72,6 +73,9 @@ public class Robot_UI : MonoBehaviour
         //tcp_script.port = int.Parse(Port.text);
         //tcp_script.runServer = runServer.isOn;
         //tcp_script.msPerTransmit = int.Parse(SendFreq.text);
+    }
+    public void configSimCBConnect(){
+        sceneManagement.setupSimCBConnect(runSimCB.isOn);
     }
     public void configControlMode(){
         sceneManagement.configRobotControlMode(controlModeDropdown.value);

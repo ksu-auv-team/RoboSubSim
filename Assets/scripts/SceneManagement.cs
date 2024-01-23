@@ -93,6 +93,10 @@ public class SceneManagement : MonoBehaviour
         ui_script.runServer.isOn = runServer;
         ui_script.SendFreq.text = msPerTransmit.ToString();
     }
+    public void setupSimCBConnect(bool simCB_Connect){
+        tcpServer.simCB_Connect = simCB_Connect;
+        ui_script.runSimCB.isOn = simCB_Connect;
+    }
     /// <summary>
     /// Robot Dynamics Configurations
     /// </summary>

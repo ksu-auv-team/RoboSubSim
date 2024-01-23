@@ -184,6 +184,15 @@ public class CommandPacket{
         return error_code;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="nwStream"></param>
+    /// <param name="bytes_to_send"></param>
+    /// <returns> 
+    /// True: END byte sent
+    /// False: END byte not sent
+    /// </returns>
     public bool sendPacket(NetworkStream nwStream, int bytes_to_send){
         while (bytes_to_send > 0){
             bytes_to_send -= 1;
@@ -248,23 +257,10 @@ public class TCPServer : MonoBehaviour
     SceneManagement sceneManagement;
     public string IPAddr = "127.0.0.1";
     public int port = -1;
-    //public int motorsPort = -1;
-    //public int gyroPort = -1;
-    //public int imageCommandsPort = -1;
-    //public bool general = true;
-    //bool running;
     public int msPerTransmit = 100;
     private float currentTime = 0;
-    //private RobotIMU imu_script;
-    //private RobotForce motor_script;
-    //private RobotCamera camera_script;
     public string ui_message = "Closed";
-    //private Thread threadMotors;
-    //private Thread threadGyro;
-    //private Thread threadImages;
-    private Thread threadGeneral;
-    //private PortsID portsID; 
-    //[HideInInspector]
+    private Thread threadRust;
     public bool runServer = false;
     private bool serverStarted = false;
     private byte[] buffer;
@@ -272,6 +268,17 @@ public class TCPServer : MonoBehaviour
     List<CommandPacket> sendCommandsPool = new List<CommandPacket>(64);
     CommandPacket receiveLoadingPacket;
     CommandPacket sendLoadingPacket;
+
+    private Thread threadSimCB;
+    public bool simCB_Connect = false;
+    public string simCB_IPAddr = "127.0.0.1";
+    public int simCB_Port = 5014;
+    public bool simCB_Connected = false;
+    TcpClient simCB_client;
+    List<CommandPacket> simCB_receiveCommandsPool = new List<CommandPacket>(64);
+    List<CommandPacket> simCB_sendCommandsPool = new List<CommandPacket>(64);
+    CommandPacket simCB_receiveLoadingPacket;
+    CommandPacket simCB_sendLoadingPacket;
     void Start()
     {
         foreach (string command in POSSIBLE_COMMANDS) {
@@ -282,7 +289,11 @@ public class TCPServer : MonoBehaviour
         receiveLoadingPacket = new CommandPacket(128, sceneManagement);
         sendLoadingPacket = new CommandPacket(128, sceneManagement);
         buffer = new byte[10];
-        threadGeneral = new Thread(() => GetData(port));
+        threadRust = new Thread(() => GetData(port));
+
+        simCB_receiveLoadingPacket = new CommandPacket(128, sceneManagement);
+        simCB_sendLoadingPacket = new CommandPacket(128, sceneManagement);
+        
     }
     void Update(){
         currentTime += (int)(Time.deltaTime * 1000);
@@ -297,6 +308,20 @@ public class TCPServer : MonoBehaviour
         }
         //Debug.Log("Received Count: " + receiveCommandsPool.Count + " Send Count: " + sendCommandsPool.Count);
         //print(runServer);
+
+        if (simCB_Connect && !simCB_Connected) {
+            simCB_client = new TcpClient(simCB_IPAddr, simCB_Port);
+            simCB_Connected = true;
+            threadSimCB = new Thread(() => GetDataSimCB());
+            threadSimCB.Start();
+            Debug.Log("SimCB connected");
+        }
+        if (!simCB_Connect && simCB_Connected) {
+            Debug.Log("SimCB disconnect");
+            simCB_Connected = false;
+            simCB_client.Close();
+            threadSimCB.Join();
+        }
     }
     void OnDestroy(){
         stopThread();
@@ -335,7 +360,7 @@ public class TCPServer : MonoBehaviour
         bool running;
         while (runServer)
         {
-            running = Connection(client, nwStream);
+            running = Connection(client, nwStream, false);
         }
         Debug.Log("Port:" + port + ", closed on " + IPAddr);
         server.Stop();
@@ -343,19 +368,27 @@ public class TCPServer : MonoBehaviour
         // Create the server
         
     }
-
-    bool Connection(TcpClient client, NetworkStream nwStream)
+    void GetDataSimCB(){
+        NetworkStream nwStream = simCB_client.GetStream();
+        while (simCB_Connected)
+        {
+            Connection(simCB_client, nwStream, true);
+        }
+    }
+    bool Connection(TcpClient client, NetworkStream nwStream, bool isSimCB)
     {
         if (currentTime > msPerTransmit){
             //Debug.Log(currentTime);
-            ParseSendData(nwStream);
+            if (sendCommandsPool.Count > 0) {
+                ParseSendData(nwStream, isSimCB);
+            }
             currentTime = 0;
         }
         // Read data from the network stream
         if (nwStream.DataAvailable){
             int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
             //print(bytesRead);
-            ParseReceivedData(bytesRead);
+            ParseReceivedData(bytesRead, isSimCB);
         }
         else{
             // process the latest received command (Last in first out)
@@ -365,6 +398,16 @@ public class TCPServer : MonoBehaviour
                     print("TCP Receive Command Pool Overflow");
                     receiveCommandsPool.RemoveRange(0, receiveCommandsPool.Count / 2);
                 }
+                
+                // SimCB
+                if(simCB_Connected){
+                    simCB_sendCommandsPool.Add(receiveCommandsPool[receiveCommandsPool.Count-1]);
+                }
+                if(!simCB_Connected && isSimCB){
+                    return false; // disconnect for simCB, join thread
+                }
+
+                // Rust
                 byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
                 if (error_code < 5) {
                     sendCommandsPool.Add(new CommandPacket(sceneManagement, 
@@ -382,27 +425,30 @@ public class TCPServer : MonoBehaviour
                 }
                 receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
             }
-            // process the earlies send command (Last in last out)
-            // because new send may be added to the pool
-            if (sendCommandsPool.Count > 0) {
-                // have too many sends in the pool, clear the oldest half of commands (but leave zero index for sending)
-                if (sendCommandsPool.Count > 128) {
-                    print("TCP Send Command Pool Overflow");
-                    sendCommandsPool.RemoveRange(1, sendCommandsPool.Count / 2);
-                }
-                if (sendCommandsPool[0].sendPacket(nwStream, 2)) {
-                    //Debug.Log("Complete Send");
-                    sendCommandsPool.RemoveAt(0);
-                } else {
-                    //Debug.Log("current count: " + sendCommandsPool[0].body_counter);
-                }
-            }
+            
         }
         
             //Debug.Log("No msg received");
         return true;
     }
-    void ParseSendData(NetworkStream nwStream){
+    void ParseSendData(NetworkStream nwStream, bool isSimCB){
+        // have too many sends in the pool, clear the oldest half of commands (but leave zero index for sending)
+        if (sendCommandsPool.Count > 128) {
+            print("TCP Send Command Pool Overflow");
+            sendCommandsPool.RemoveRange(1, sendCommandsPool.Count / 2);
+        }
+        // process the earlies send command (Last in last out)
+        // because new send may be added to the pool
+        if (simCB_Connected) {
+            simCB_sendCommandsPool[0].sendPacket(nwStream, 2);
+            return;
+        }   
+        if (sendCommandsPool[0].sendPacket(nwStream, 2)) {
+            //Debug.Log("Complete Send");
+            sendCommandsPool.RemoveAt(0);
+        } else {
+            //Debug.Log("current count: " + sendCommandsPool[0].body_counter);
+        }
         //byte[] imu_buf = new byte[24];
         //IMU imu = sceneManagement.getRobotIMU();
         //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
@@ -431,9 +477,22 @@ public class TCPServer : MonoBehaviour
                 //Debug.Log(System.BitConverter.IsLittleEndian);
     }
     // Use-case specific function, need to re-write this to interpret whatever data is being sent
-    void ParseReceivedData(int bytesRead)
+    void ParseReceivedData(int bytesRead, bool isSimCB)
     {
         int i = 0;
+        if (isSimCB){
+            while (i < bytesRead){
+                if (simCB_receiveLoadingPacket.processByte(buffer[i])){
+                    //print(receiveLoadingPacket.ToString());
+                    CommandPacket newPacket = new CommandPacket(sceneManagement, simCB_receiveLoadingPacket.body, simCB_receiveLoadingPacket.body_counter);
+                    simCB_receiveCommandsPool.Add(newPacket);
+                    simCB_receiveLoadingPacket.reset();
+                }
+                //print("received");
+                i += 1;
+            }
+            return;
+        }
         while (i < bytesRead){
             if (receiveLoadingPacket.processByte(buffer[i])){
                 //print(receiveLoadingPacket.ToString());
@@ -447,28 +506,12 @@ public class TCPServer : MonoBehaviour
     }
 
     void startThread(){
-        //if (general) {
-        //    if (!threadGeneral.IsAlive) {
-                threadGeneral.Start();
-        //    }
-        //} else {
-        //    threadMotors.Start();
-        //    threadGyro.Start();
-        //    threadImages.Start();
-        //}
+        threadRust.Start();
     }
     void stopThread(){
-        //if (general) {
-            //threadGeneral.Abort();
-            runServer = false;
-            threadGeneral.Join();
-            threadGeneral = new Thread(() => GetData(port));
-        
-        //} else {
-        //    threadMotors = new Thread(() => GetData(motorsPort, PortsID.motors));
-        //    threadGyro = new Thread(() => GetData(gyroPort, PortsID.imu));
-        //    threadImages = new Thread(() => GetData(imageCommandsPort, PortsID.commands));
-        //}
+        runServer = false;
+        threadRust.Join();
+        threadRust = new Thread(() => GetData(port));
     }
     
     // Position is the data being received in this example
