@@ -75,7 +75,7 @@ public class CommandPacket{
         return crc_bytes;
     }
     public bool processByte(byte data){
-        Debug.Log("Byte: " + data + ", Count: " + body_counter + ", bodyLen: " + bodyLen + ", Escape: " + EscapeNextByte);
+        //Debug.Log("Byte: " + data + ", Count: " + body_counter + ", bodyLen: " + bodyLen + ", Escape: " + EscapeNextByte);
         switch(commandState){
             case states.Reading:
                 // buffer overflow (increase bodyLen or endByte missed)
@@ -134,10 +134,11 @@ public class CommandPacket{
     }
     public byte processCommand(Dictionary<string, byte[]> commands){
         byte error_code = 0;
-        Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
-
+        //Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
+        bool is_command = false;
         foreach (KeyValuePair<string, byte[]> command in commands) {
             if (isCommand(command.Value)) {
+                is_command = true;
                 Debug.Log("Received Command: " + command.Key);
                 switch(command.Key){
                     case "RAW":
@@ -162,6 +163,15 @@ public class CommandPacket{
                         goto default;
                     case "MS5837R":
                         goto default;
+                    case "MMATS":
+                        goto default;
+                    case "MMATU":
+                        goto default;
+                    case "TINV":
+                        goto default;
+                    case "BNO055A":
+                        goto default;
+                    // simulation environment commands
                     case "CAPTUREU":
                         goto default;
                     case "RESETU":
@@ -170,13 +180,18 @@ public class CommandPacket{
                         break;
                     case "ROBOTSELU":
                         goto default;
+                    
                     default:
                         Debug.Log("Unimplemented command: " + command.Key);
                         break;
                 }
-            } else {
-                Debug.Log("Unknown Command. Bytes: " + ToString());
             }
+            if (is_command) {
+                break;
+            }
+        }
+        if (!is_command) {
+            Debug.Log("Unknown Command. Bytes: " + ToString());
         }
         
         //ParseFloats(body,1,0);
@@ -247,7 +262,8 @@ public class TCPServer : MonoBehaviour
 {
     readonly string[] POSSIBLE_COMMANDS = new string[] {
             // control board commands
-            "RAW", "LOCAL", "GLOBAL", "RELDOF", "BNO055P", "MS5837P", "WDGS", "BNO055R", "MS5837R", 
+            "RAW", "LOCAL", "GLOBAL", "RELDOF", "BNO055P", "MS5837P", "WDGS", "BNO055R", "MS5837R",
+            "MMATS", "MMATU", "TINV", "BNO055A",
             // Other commands
             "CAPTUREU", "RESETU", "CAMCFGU", "ROBOTSELU",
             // acknowledge
@@ -275,6 +291,7 @@ public class TCPServer : MonoBehaviour
     public int simCB_Port = 5014;
     public bool simCB_Connected = false;
     TcpClient simCB_client;
+    private byte[] simCB_buffer;
     List<CommandPacket> simCB_receiveCommandsPool = new List<CommandPacket>(64);
     List<CommandPacket> simCB_sendCommandsPool = new List<CommandPacket>(64);
     CommandPacket simCB_receiveLoadingPacket;
@@ -291,6 +308,7 @@ public class TCPServer : MonoBehaviour
         buffer = new byte[10];
         threadRust = new Thread(() => GetData(port));
 
+        simCB_buffer = new byte[10];
         simCB_receiveLoadingPacket = new CommandPacket(128, sceneManagement);
         simCB_sendLoadingPacket = new CommandPacket(128, sceneManagement);
         
@@ -311,6 +329,7 @@ public class TCPServer : MonoBehaviour
 
         if (simCB_Connect && !simCB_Connected) {
             simCB_client = new TcpClient(simCB_IPAddr, simCB_Port);
+            simCB_client.ReceiveBufferSize = 8;
             simCB_Connected = true;
             threadSimCB = new Thread(() => GetDataSimCB());
             threadSimCB.Start();
@@ -386,7 +405,12 @@ public class TCPServer : MonoBehaviour
         }
         // Read data from the network stream
         if (nwStream.DataAvailable){
-            int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+            int bytesRead = 0;
+            if (isSimCB){
+                bytesRead = nwStream.Read(simCB_buffer, 0, client.ReceiveBufferSize);
+            } else {
+                bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+            }
             //print(bytesRead);
             ParseReceivedData(bytesRead, isSimCB);
         }
@@ -399,31 +423,41 @@ public class TCPServer : MonoBehaviour
                     receiveCommandsPool.RemoveRange(0, receiveCommandsPool.Count / 2);
                 }
                 
-                // SimCB
-                if(simCB_Connected){
-                    simCB_sendCommandsPool.Add(receiveCommandsPool[receiveCommandsPool.Count-1]);
+                
+                if (isSimCB){
+                    // SimCB
+                    // copy
+                    if(simCB_Connected){
+                        Debug.Log("Copying rust command to simCB send pool");
+                        simCB_sendCommandsPool.Add(
+                            new CommandPacket(sceneManagement, 
+                                            receiveCommandsPool[receiveCommandsPool.Count-1].body,
+                                            receiveCommandsPool[receiveCommandsPool.Count-1].body_counter)
+                                            );
+                        receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
+                    } else {
+                        return false; // disconnect for simCB, join thread
+                    }
+                    return true;
+                } else {
+                    // Rust only
+                    byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
+                    if (error_code < 5) {
+                        sendCommandsPool.Add(new CommandPacket(sceneManagement, 
+                                                                id: 0,
+                                                                header: commandsHeader["ACK"], 
+                                                                data: new byte[] {
+                                                                    receiveCommandsPool[receiveCommandsPool.Count-1].body[0],
+                                                                    receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
+                                                                    error_code
+                                                                }));
+                        sendCommandsPool.Add(new CommandPacket(sceneManagement, id: 10, 
+                                                                    header: commandsHeader["WDGS"], 
+                                                                    data: new byte[] {1}//imu_buf
+                                                                    ));
+                    }
+                    receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
                 }
-                if(!simCB_Connected && isSimCB){
-                    return false; // disconnect for simCB, join thread
-                }
-
-                // Rust
-                byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
-                if (error_code < 5) {
-                    sendCommandsPool.Add(new CommandPacket(sceneManagement, 
-                                                            id: 0,
-                                                            header: commandsHeader["ACK"], 
-                                                            data: new byte[] {
-                                                                receiveCommandsPool[receiveCommandsPool.Count-1].body[0],
-                                                                receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
-                                                                error_code
-                                                            }));
-                    sendCommandsPool.Add(new CommandPacket(sceneManagement, id: 10, 
-                                                                header: commandsHeader["WDGS"], 
-                                                                data: new byte[] {1}//imu_buf
-                                                                ));
-                }
-                receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
             }
             
         }
@@ -440,6 +474,7 @@ public class TCPServer : MonoBehaviour
         // process the earlies send command (Last in last out)
         // because new send may be added to the pool
         if (simCB_Connected) {
+            Debug.Log("Sending simCB packet");
             simCB_sendCommandsPool[0].sendPacket(nwStream, 2);
             return;
         }   
@@ -481,9 +516,11 @@ public class TCPServer : MonoBehaviour
     {
         int i = 0;
         if (isSimCB){
+            // SimCB
             while (i < bytesRead){
-                if (simCB_receiveLoadingPacket.processByte(buffer[i])){
+                if (simCB_receiveLoadingPacket.processByte(simCB_buffer[i])){
                     //print(receiveLoadingPacket.ToString());
+                    Debug.Log("SimCB received command packet");
                     CommandPacket newPacket = new CommandPacket(sceneManagement, simCB_receiveLoadingPacket.body, simCB_receiveLoadingPacket.body_counter);
                     simCB_receiveCommandsPool.Add(newPacket);
                     simCB_receiveLoadingPacket.reset();
@@ -492,16 +529,19 @@ public class TCPServer : MonoBehaviour
                 i += 1;
             }
             return;
-        }
-        while (i < bytesRead){
-            if (receiveLoadingPacket.processByte(buffer[i])){
-                //print(receiveLoadingPacket.ToString());
-                CommandPacket newPacket = new CommandPacket(sceneManagement, receiveLoadingPacket.body, receiveLoadingPacket.body_counter);
-                receiveCommandsPool.Add(newPacket);
-                receiveLoadingPacket.reset();
+        } else {
+            // Robot (Rust)
+            while (i < bytesRead){
+                if (receiveLoadingPacket.processByte(buffer[i])){
+                    //print(receiveLoadingPacket.ToString());
+                    Debug.Log("RustServer received command packet");
+                    CommandPacket newPacket = new CommandPacket(sceneManagement, receiveLoadingPacket.body, receiveLoadingPacket.body_counter);
+                    receiveCommandsPool.Add(newPacket);
+                    receiveLoadingPacket.reset();
+                }
+                //print("received");
+                i += 1;
             }
-            //print("received");
-            i += 1;
         }
     }
 
