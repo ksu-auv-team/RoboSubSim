@@ -80,12 +80,13 @@ public class CommandPacket{
             case states.Reading:
                 // buffer overflow (increase bodyLen or endByte missed)
                 if (body_counter >= bodyLen){
+                    Debug.Log("Command length overflown");
                     return true;
                 }
                 // terminate message
                 if (data == END) {
                     if (EscapeNextByte) {
-                        body[body_counter] = data;
+                        body[body_counter] = data;  // also load the end byte
                         body_counter += 1;
                         EscapeNextByte = false;
                     }
@@ -104,7 +105,7 @@ public class CommandPacket{
                     EscapeNextByte = true; 
                     break;
                 }
-                
+                // load data
                 body[body_counter] = data;
                 //Debug.Log("Add byte to body: " + body[body_counter]);
                 body_counter += 1;
@@ -398,8 +399,14 @@ public class TCPServer : MonoBehaviour
     {
         if (currentTime > msPerTransmit){
             //Debug.Log(currentTime);
-            if (sendCommandsPool.Count > 0) {
-                ParseSendData(nwStream, isSimCB);
+            if (isSimCB) {
+                if (simCB_sendCommandsPool.Count > 0) {
+                    ParseSendData(nwStream, isSimCB);
+                }
+            } else {
+                if (sendCommandsPool.Count > 0) {
+                    ParseSendData(nwStream, isSimCB);
+                }
             }
             currentTime = 0;
         }
@@ -466,6 +473,20 @@ public class TCPServer : MonoBehaviour
         return true;
     }
     void ParseSendData(NetworkStream nwStream, bool isSimCB){
+        if (isSimCB) {
+            if (simCB_sendCommandsPool.Count > 128) {
+                print("simCB: TCP Send Command Pool Overflow");
+                simCB_sendCommandsPool.RemoveRange(1, simCB_sendCommandsPool.Count / 2);
+            }
+            if (simCB_Connected) {
+                Debug.Log("Sending simCB packet");
+                if (simCB_sendCommandsPool[0].sendPacket(nwStream, 2)) {
+                    simCB_sendCommandsPool.RemoveAt(0);
+                };
+                return;
+            }
+            return;
+        }
         // have too many sends in the pool, clear the oldest half of commands (but leave zero index for sending)
         if (sendCommandsPool.Count > 128) {
             print("TCP Send Command Pool Overflow");
@@ -473,11 +494,6 @@ public class TCPServer : MonoBehaviour
         }
         // process the earlies send command (Last in last out)
         // because new send may be added to the pool
-        if (simCB_Connected) {
-            Debug.Log("Sending simCB packet");
-            simCB_sendCommandsPool[0].sendPacket(nwStream, 2);
-            return;
-        }   
         if (sendCommandsPool[0].sendPacket(nwStream, 2)) {
             //Debug.Log("Complete Send");
             sendCommandsPool.RemoveAt(0);
