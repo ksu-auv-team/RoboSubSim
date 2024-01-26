@@ -422,51 +422,57 @@ public class TCPServer : MonoBehaviour
             ParseReceivedData(bytesRead, isSimCB);
         }
         else{
-            // process the latest received command (Last in first out)
-            if (receiveCommandsPool.Count > 0){
-                // received too many commands, clear oldest half of commands
-                if (receiveCommandsPool.Count > 128) {
-                    print("TCP Receive Command Pool Overflow");
-                    receiveCommandsPool.RemoveRange(0, receiveCommandsPool.Count / 2);
+            if (isSimCB){
+                if (simCB_receiveCommandsPool.Count > 0) {
+                    if (simCB_receiveCommandsPool.Count > 128) {
+                        print("simCB: TCP Receive Command Pool Overflow");
+                        simCB_receiveCommandsPool.RemoveRange(0, simCB_receiveCommandsPool.Count / 2);
+                    }
+
+                    simCB_receiveCommandsPool.RemoveAt(simCB_receiveCommandsPool.Count-1);
                 }
-                
-                
-                if (isSimCB){
-                    // SimCB
-                    // copy
+            } else {
+            // process the latest received command (Last in first out)
+                if (receiveCommandsPool.Count > 0){
+                    // received too many commands, clear oldest half of commands
+                    if (receiveCommandsPool.Count > 128) {
+                        print("TCP Receive Command Pool Overflow");
+                        receiveCommandsPool.RemoveRange(0, receiveCommandsPool.Count / 2);
+                    }
+
                     if(simCB_Connected){
+                        // SimCB
+                        // copy command to send to simCB
                         Debug.Log("Copying rust command to simCB send pool");
                         simCB_sendCommandsPool.Add(
                             new CommandPacket(sceneManagement, 
                                             receiveCommandsPool[receiveCommandsPool.Count-1].body,
                                             receiveCommandsPool[receiveCommandsPool.Count-1].body_counter)
                                             );
-                        receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
                     } else {
-                        return false; // disconnect for simCB, join thread
-                    }
-                    return true;
-                } else {
-                    // Rust only
-                    byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
-                    if (error_code < 5) {
-                        sendCommandsPool.Add(new CommandPacket(sceneManagement, 
-                                                                id: 0,
-                                                                header: commandsHeader["ACK"], 
-                                                                data: new byte[] {
-                                                                    receiveCommandsPool[receiveCommandsPool.Count-1].body[0],
-                                                                    receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
-                                                                    error_code
-                                                                }));
-                        sendCommandsPool.Add(new CommandPacket(sceneManagement, id: 10, 
-                                                                    header: commandsHeader["WDGS"], 
-                                                                    data: new byte[] {1}//imu_buf
-                                                                    ));
+                        // Rust only
+                        byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
+                        if (error_code < 5) {
+                            sendCommandsPool.Add(
+                                new CommandPacket(sceneManagement, 
+                                                id: 0,
+                                                header: commandsHeader["ACK"], 
+                                                data: new byte[] {
+                                                    receiveCommandsPool[receiveCommandsPool.Count-1].body[0],
+                                                    receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
+                                                    error_code
+                                                }));
+                            sendCommandsPool.Add(
+                                new CommandPacket(sceneManagement, 
+                                                id: 10, 
+                                                header: commandsHeader["WDGS"], 
+                                                data: new byte[] {1}//imu_buf
+                                                ));
+                        }
                     }
                     receiveCommandsPool.RemoveAt(receiveCommandsPool.Count-1);
                 }
             }
-            
         }
         
             //Debug.Log("No msg received");
