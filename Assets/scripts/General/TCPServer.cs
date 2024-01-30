@@ -94,7 +94,7 @@ public class CommandPacket{
                         //Debug.Log("Count: " + body_counter);
                         byte[] expected_crc = crc_itt16_false(body_counter-2);
                         if (expected_crc[0] != body[body_counter-2] && expected_crc[1] != body[body_counter-1]) {
-                            Debug.Log("Expected CRC: " + System.String.Join(',', expected_crc));
+                            Debug.LogWarning("Expected CRC: " + System.String.Join(',', expected_crc));
                         }
                         return true;
                     }
@@ -134,6 +134,7 @@ public class CommandPacket{
         return true;
     }
     public byte processCommand(Dictionary<string, byte[]> commands){
+        const byte NO_REPLY = 5;
         byte error_code = 0;
         //Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
         bool is_command = false;
@@ -181,7 +182,9 @@ public class CommandPacket{
                         break;
                     case "ROBOTSELU":
                         goto default;
-                    
+                    case "HEARTBEAT":
+                        error_code = NO_REPLY;
+                        break;
                     default:
                         Debug.Log("Unimplemented command: " + command.Key);
                         break;
@@ -217,7 +220,9 @@ public class CommandPacket{
                 nwStream.Write(new byte[] {START}, 0 ,1);
                 //Debug.Log("Wrote START");
             }
+            //Debug.Log(body_counter + ", " + body.Length);
             byte writebyte = body[body_counter];
+            
             //Debug.Log("write byte" + writebyte);
             if (writebyte == START || writebyte == ESCAPE || writebyte == END) {
                 nwStream.Write(new byte[] {ESCAPE, writebyte}, 0, 2);
@@ -268,7 +273,9 @@ public class TCPServer : MonoBehaviour
             // Other commands
             "CAPTUREU", "RESETU", "CAMCFGU", "ROBOTSELU",
             // acknowledge
-            "ACK"
+            "ACK",
+            // simCB
+            "HEARTBEAT"
         };
     Dictionary<string, byte[]> commandsHeader = new Dictionary<string, byte[]>();
     SceneManagement sceneManagement;
@@ -428,7 +435,26 @@ public class TCPServer : MonoBehaviour
                         print("simCB: TCP Receive Command Pool Overflow");
                         simCB_receiveCommandsPool.RemoveRange(0, simCB_receiveCommandsPool.Count / 2);
                     }
-
+                    Debug.Log("simCB: processing command");
+                    byte error_code = simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].processCommand(commandsHeader);
+                    if (error_code < 5) {
+                        Debug.Log("simCB replying to rust robot");
+                        sendCommandsPool.Add(
+                                new CommandPacket(sceneManagement, 
+                                                id: 0,
+                                                header: commandsHeader["ACK"], 
+                                                data: new byte[] {
+                                                    simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body[0],
+                                                    simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body[1],
+                                                    error_code
+                                                }));
+                        sendCommandsPool.Add(
+                                new CommandPacket(sceneManagement, 
+                                                id: 10, 
+                                                header: commandsHeader["WDGS"], 
+                                                data: new byte[] {1}//imu_buf
+                                                ));
+                    }
                     simCB_receiveCommandsPool.RemoveAt(simCB_receiveCommandsPool.Count-1);
                 }
             } else {
@@ -447,7 +473,7 @@ public class TCPServer : MonoBehaviour
                         simCB_sendCommandsPool.Add(
                             new CommandPacket(sceneManagement, 
                                             receiveCommandsPool[receiveCommandsPool.Count-1].body,
-                                            receiveCommandsPool[receiveCommandsPool.Count-1].body_counter)
+                                            receiveCommandsPool[receiveCommandsPool.Count-1].body.Length)
                                             );
                     } else {
                         // Rust only
@@ -481,12 +507,13 @@ public class TCPServer : MonoBehaviour
     void ParseSendData(NetworkStream nwStream, bool isSimCB){
         if (isSimCB) {
             if (simCB_sendCommandsPool.Count > 128) {
-                print("simCB: TCP Send Command Pool Overflow");
+                Debug.LogWarning("simCB: TCP Send Command Pool Overflow");
                 simCB_sendCommandsPool.RemoveRange(1, simCB_sendCommandsPool.Count / 2);
             }
             if (simCB_Connected) {
-                Debug.Log("Sending simCB packet");
-                if (simCB_sendCommandsPool[0].sendPacket(nwStream, 2)) {
+                //Debug.Log("Sending simCB packet");
+                if (simCB_sendCommandsPool[0].sendPacket(nwStream, 100)) {
+                    Debug.Log("Sent simCB: " + simCB_sendCommandsPool[0].ToString());
                     simCB_sendCommandsPool.RemoveAt(0);
                 };
                 return;
@@ -495,7 +522,7 @@ public class TCPServer : MonoBehaviour
         }
         // have too many sends in the pool, clear the oldest half of commands (but leave zero index for sending)
         if (sendCommandsPool.Count > 128) {
-            print("TCP Send Command Pool Overflow");
+            Debug.LogWarning("TCP Send Command Pool Overflow");
             sendCommandsPool.RemoveRange(1, sendCommandsPool.Count / 2);
         }
         // process the earlies send command (Last in last out)
@@ -541,7 +568,7 @@ public class TCPServer : MonoBehaviour
             // SimCB
             while (i < bytesRead){
                 if (simCB_receiveLoadingPacket.processByte(simCB_buffer[i])){
-                    //print(receiveLoadingPacket.ToString());
+                    //print(simCB_receiveLoadingPacket.ToString());
                     Debug.Log("SimCB received command packet");
                     CommandPacket newPacket = new CommandPacket(sceneManagement, simCB_receiveLoadingPacket.body, simCB_receiveLoadingPacket.body_counter);
                     simCB_receiveCommandsPool.Add(newPacket);
