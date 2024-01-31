@@ -158,7 +158,7 @@ public class CommandPacket{
                         break;
                     case "WDGS":
                         error_code = PROCESS_CODES.WDGS_REPLY;
-                        Debug.Log("WDGS: " + ToString());
+                        //Debug.Log("WDGS: " + ToString());
                         break;
                     case "RAW":
                         float[] motor_power = ParseFloats(body, 8, 5);
@@ -455,21 +455,27 @@ public class TCPServer : MonoBehaviour
                     //Debug.Log("simCB: processing command");
                     byte error_code = simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].processCommand(commandsHeader);
                     error_code = (byte)(error_code | PROCESS_CODES.SIMCB_REPLY);
-                    if (error_code == (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.ACK_REPLY)) {
-                        Debug.Log("simCB replying to Rust with ACK");
-                        sendCommandsPool.Add(
+                    switch (error_code) {
+                        case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.ACK_REPLY):
+                            Debug.Log("simCB replying to Rust with ACK");
+                            sendCommandsPool.Add(
                                 new CommandPacket(sceneManagement, 
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body,
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body.Length
                                                 ));
-                    }
-                    if (error_code == (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.WDGS_REPLY)) {
-                        Debug.Log("simCB replying to Rust with WDGS");
-                        sendCommandsPool.Add(
+                            break;
+                        case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.WDGS_REPLY):
+                            Debug.Log("simCB replying to Rust with WDGS, " + simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].ToString());
+                            sendCommandsPool.Add(
                                 new CommandPacket(sceneManagement, 
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body,
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body.Length
                                                 ));
+                            break;
+                        case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.NO_REPLY):
+                            break;
+                        default:
+                            break;
                     }
                     simCB_receiveCommandsPool.RemoveAt(simCB_receiveCommandsPool.Count-1);
                 }
