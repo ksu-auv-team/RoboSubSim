@@ -11,7 +11,7 @@ public class WaterRandomization : MonoBehaviour
     public float centerVisibility = 5f;
     public float multiplierVisibility = 2.5f;
 
-    private bool waterColorChanged = false;
+    //private bool waterColorChanged = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -45,7 +45,7 @@ public class WaterRandomization : MonoBehaviour
         float brightness = Random.Range(0.3f, 1.0f);
         SetWaterColor(blue, green, brightness);
         //waterScript.scatteringColor.a = 0.35f;
-        waterColorChanged = true;
+        //waterColorChanged = true;
     }
     void RandomVisibility(){
         waterScript.absorptionDistance = centerVisibility * Random.Range(0.9f,1.1f); // surface visiblility (meters)

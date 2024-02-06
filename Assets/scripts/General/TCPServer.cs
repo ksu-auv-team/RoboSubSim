@@ -152,7 +152,19 @@ public class CommandPacket{
                 is_command = true;
                 Debug.Log("Received Command: " + command.Key);
                 switch(command.Key){
+                    case "SIMSTAT":
+                        Debug.Log("SIMSTAT: " + ToString());
+                        break;
                     case "ACK":
+                        if(body[7] != 0) {
+                            Debug.LogWarning("Received problematic ACK message from CB. ID: " 
+                                + System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) 
+                                + " Code: " + body[7]);
+                            Debug.Log("Bytes:" + ToString());
+                        }
+                        Debug.Log("ID: " 
+                                + System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) 
+                                + " Code: " + body[7]);
                         error_code = PROCESS_CODES.ACK_REPLY;
                         //Debug.Log("ACK: " + ToString());
                         break;
@@ -265,7 +277,7 @@ public class CommandPacket{
         EscapeNextByte = false;
         commandState = states.Waiting;
     }
-    public string ToString(){
+    public override string ToString(){
         return System.String.Join(",", body);
         //return System.Text.Encoding.Default.GetString(body);
     }
@@ -292,7 +304,7 @@ public class TCPServer : MonoBehaviour
             // acknowledge
             "ACK",
             // simCB
-            "HEARTBEAT"
+            "HEARTBEAT", "SIMHIJACK", "SIMDAT", "SIMSTAT"
         };
     Dictionary<string, byte[]> commandsHeader = new Dictionary<string, byte[]>();
     SceneManagement sceneManagement;
@@ -373,6 +385,33 @@ public class TCPServer : MonoBehaviour
     void OnApplicationQuit(){
         stopThread();
     }
+    void SimHijack(ushort simCB_id = 60000, byte hijack = 1){
+        simCB_sendCommandsPool.Add(
+                            new CommandPacket(sceneManagement, 
+                                            id: simCB_id,
+                                            header: commandsHeader["SIMHIJACK"],
+                                            data: new byte[] {hijack})
+                                    );
+    }
+    void SimData(IMU imu, ushort simCB_id = 60000){
+        byte[] simCB_imu_data = new byte[20];
+        Debug.Log(System.BitConverter.IsLittleEndian);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.quaternion.w), 0, simCB_imu_data, 0, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.quaternion.x), 0, simCB_imu_data, 4, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.quaternion.y), 0, simCB_imu_data, 8, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.quaternion.z), 0, simCB_imu_data, 12, 4);
+        System.Buffer.BlockCopy(System.BitConverter.GetBytes(
+                                imu.quaternion.w), 0, simCB_imu_data, 16, 4);
+        simCB_sendCommandsPool.Add(
+                            new CommandPacket(sceneManagement,
+                                            id: simCB_id,
+                                            header: commandsHeader["SIMDAT"],
+                                            data: simCB_imu_data));
+    }
     void GetData(int port)
     {
         if (port < 0){
@@ -414,6 +453,7 @@ public class TCPServer : MonoBehaviour
     }
     void GetDataSimCB(){
         NetworkStream nwStream = simCB_client.GetStream();
+        SimHijack();
         while (simCB_Connected)
         {
             Connection(simCB_client, nwStream, true);
