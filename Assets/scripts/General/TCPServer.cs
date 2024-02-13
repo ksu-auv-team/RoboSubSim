@@ -10,6 +10,7 @@ public class PROCESS_CODES{
     public const byte NO_REPLY = 0b0000_0000;
     public const byte ACK_REPLY = 11;
     public const byte WDGS_REPLY = 12;
+    public const byte CHANGED_REPLY = 13;
 }
 public class CommandPacket{
     public byte[] body; // include id, body, crc
@@ -144,7 +145,7 @@ public class CommandPacket{
         return true;
     }
     public byte processCommand(Dictionary<string, byte[]> commands){
-        byte error_code = PROCESS_CODES.NO_REPLY;
+        byte process_code = PROCESS_CODES.NO_REPLY;
         //Debug.Log("Length: " + body.Length + " Bytes: " + ToString());
         bool is_command = false;
         foreach (KeyValuePair<string, byte[]> command in commands) {
@@ -153,7 +154,11 @@ public class CommandPacket{
                 Debug.Log("Received Command: " + command.Key);
                 switch(command.Key){
                     case "SIMSTAT":
-                        Debug.Log("SIMSTAT: " + ToString());
+                        //Debug.Log("SIMSTAT: " + ToString());
+                        float[] motor_power = ParseFloats(body, 8, 9);
+                        Debug.Log("Vals: " + string.Join(",", motor_power) + " Mode: " + body[body.Length-4] + " WDog Status: " + body[body.Length-3]);
+                        sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
+                                                        motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
                         break;
                     case "ACK":
                         if(body[7] != 0) {
@@ -165,19 +170,35 @@ public class CommandPacket{
                         Debug.Log("ID: " 
                                 + System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) 
                                 + " Code: " + body[7]);
-                        error_code = PROCESS_CODES.ACK_REPLY;
+                        process_code = PROCESS_CODES.ACK_REPLY;
                         //Debug.Log("ACK: " + ToString());
                         break;
                     case "WDGS":
-                        error_code = PROCESS_CODES.WDGS_REPLY;
+                        process_code = PROCESS_CODES.WDGS_REPLY;
                         //Debug.Log("WDGS: " + ToString());
                         break;
                     case "RAW":
-                        float[] motor_power = ParseFloats(body, 8, 5);
-                        Debug.Log("Vals: " + string.Join(",", motor_power));
-                        sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
-                                                        motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
+                        //float[] motor_power = ParseFloats(body, 8, 5);
+                        //Debug.Log("Vals: " + string.Join(",", motor_power));
+                        //sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
+                        //                                motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
+                        //break;
+                        goto default;
+                    case "SASSISTTN":
+                        int newLength = body.Length-4;
+                        byte[] temp = new byte[newLength];
+                        System.Buffer.BlockCopy(body, 0, temp, 0, 2);
+                        temp[2] = 83;
+                        temp[3] = 73;
+                        temp[4] = 68;
+                        System.Buffer.BlockCopy(body, 9, temp, 5, newLength-5);
+                        Debug.Log("original: " + ToString());
+                        body = temp;
+                        System.Buffer.BlockCopy(crc_itt16_false(newLength), 0, body, newLength-2, 2);
+                        Debug.Log("transformed: " + ToString());
+                        process_code = PROCESS_CODES.CHANGED_REPLY;
                         break;
+                        //goto default;
                     case "LOCAL":
                         goto default;
                     case "GLOBAL":
@@ -212,10 +233,10 @@ public class CommandPacket{
                     case "ROBOTSELU":
                         goto default;
                     case "HEARTBEAT":
-                        error_code = PROCESS_CODES.NO_REPLY;
+                        process_code = PROCESS_CODES.NO_REPLY;
                         break;
                     default:
-                        Debug.Log("Unimplemented command: " + command.Key);
+                        Debug.Log("Unimplemented command (sending to simCB if possible): " + command.Key);
                         break;
                 }
             }
@@ -224,12 +245,12 @@ public class CommandPacket{
             }
         }
         if (!is_command) {
-            Debug.Log("Unknown Command. Bytes: " + ToString());
+            Debug.Log("Unknown Command (sending to simCB if possible). Bytes: " + ToString());
         }
         
         //ParseFloats(body,1,0);
         //Debug.Log(ParseFloats(body,1,0)[0]);
-        return error_code;
+        return process_code;
     }
 
     /// <summary>
@@ -299,7 +320,9 @@ public class TCPServer : MonoBehaviour
             // control board commands
             "RAW", "LOCAL", "GLOBAL", "RELDOF", "BNO055P", "MS5837P", "WDGS", "BNO055R", "MS5837R",
             "MMATS", "MMATU", "TINV", "BNO055A",
-            // Other commands
+            // other commands
+            "SASSISTTN",
+            // unity commands
             "CAPTUREU", "RESETU", "CAMCFGU", "ROBOTSELU",
             // acknowledge
             "ACK",
@@ -405,7 +428,7 @@ public class TCPServer : MonoBehaviour
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                 imu.quaternion.z), 0, simCB_imu_data, 12, 4);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.quaternion.w), 0, simCB_imu_data, 16, 4);
+                                imu.robotPosition.z), 0, simCB_imu_data, 16, 4);
         simCB_sendCommandsPool.Add(
                             new CommandPacket(sceneManagement,
                                             id: simCB_id,
@@ -493,9 +516,9 @@ public class TCPServer : MonoBehaviour
                         simCB_receiveCommandsPool.RemoveRange(0, simCB_receiveCommandsPool.Count / 2);
                     }
                     //Debug.Log("simCB: processing command");
-                    byte error_code = simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].processCommand(commandsHeader);
-                    error_code = (byte)(error_code | PROCESS_CODES.SIMCB_REPLY);
-                    switch (error_code) {
+                    byte process_code = simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].processCommand(commandsHeader);
+                    process_code = (byte)(process_code | PROCESS_CODES.SIMCB_REPLY);
+                    switch (process_code) {
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.ACK_REPLY):
                             Debug.Log("simCB replying to Rust with ACK");
                             sendCommandsPool.Add(
@@ -539,8 +562,8 @@ public class TCPServer : MonoBehaviour
                                             );
                     } else {
                         // Rust only
-                        byte error_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
-                        if (error_code < 5) {
+                        byte process_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
+                        if (process_code < 5) {
                             sendCommandsPool.Add(
                                 new CommandPacket(sceneManagement, 
                                                 id: 0,
@@ -548,7 +571,7 @@ public class TCPServer : MonoBehaviour
                                                 data: new byte[] {
                                                     receiveCommandsPool[receiveCommandsPool.Count-1].body[0],
                                                     receiveCommandsPool[receiveCommandsPool.Count-1].body[1],
-                                                    error_code
+                                                    process_code
                                                 }));
                             sendCommandsPool.Add(
                                 new CommandPacket(sceneManagement, 
