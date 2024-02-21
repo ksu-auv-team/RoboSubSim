@@ -11,6 +11,7 @@ public class PROCESS_CODES{
     public const byte ACK_REPLY = 11;
     public const byte WDGS_REPLY = 12;
     public const byte CHANGED_REPLY = 13;
+    public const byte SIM_DATA = 14;
 }
 public class CommandPacket{
     public byte[] body; // include id, body, crc
@@ -21,6 +22,7 @@ public class CommandPacket{
     private const byte START = 253;
     private const byte END = 254;
     public SceneManagement sceneManagement;
+    public bool log = true;
     public enum states : int {
         Waiting = 0,
         Reading = 1,
@@ -159,6 +161,7 @@ public class CommandPacket{
                         Debug.Log("Vals: " + string.Join(",", motor_power) + " Mode: " + body[body.Length-4] + " WDog Status: " + body[body.Length-3]);
                         sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
                                                         motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
+                        process_code = PROCESS_CODES.SIM_DATA;
                         break;
                     case "ACK":
                         if(body[7] != 0) {
@@ -167,10 +170,12 @@ public class CommandPacket{
                                 + " Code: " + body[7]);
                             Debug.Log("Bytes:" + ToString());
                         }
-                        Debug.Log("ID: " 
-                                + System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) 
-                                + " Code: " + body[7]);
-                        process_code = PROCESS_CODES.ACK_REPLY;
+                        //Debug.Log("ID: " 
+                        //        + System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) 
+                        //        + " Code: " + body[7]);
+                        if (System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) < 60000){
+                            process_code = PROCESS_CODES.ACK_REPLY;
+                        } else {process_code = PROCESS_CODES.NO_REPLY;}
                         //Debug.Log("ACK: " + ToString());
                         break;
                     case "WDGS":
@@ -188,9 +193,9 @@ public class CommandPacket{
                         int newLength = body.Length-4;
                         byte[] temp = new byte[newLength];
                         System.Buffer.BlockCopy(body, 0, temp, 0, 2);
-                        temp[2] = 83;
-                        temp[3] = 73;
-                        temp[4] = 68;
+                        temp[2] = 83; // 'P'
+                        temp[3] = 73; // 'I'
+                        temp[4] = 68; // 'D'
                         System.Buffer.BlockCopy(body, 9, temp, 5, newLength-5);
                         Debug.Log("original: " + ToString());
                         body = temp;
@@ -299,7 +304,13 @@ public class CommandPacket{
         commandState = states.Waiting;
     }
     public override string ToString(){
-        return System.String.Join(",", body);
+        if (log){
+            //byte[] no_header_crc_body = new byte[body.Length-4];
+            //System.Array.Copy(body, 2, no_header_crc_body, 0, no_header_crc_body.Length);
+            //return System.String.Join(",", no_header_crc_body);
+            return System.String.Join(",", body);
+        }
+        return "";
         //return System.Text.Encoding.Default.GetString(body);
     }
     public static float[] ParseFloats(byte[] byteValues, int numFloats, int startIndex){
@@ -333,7 +344,7 @@ public class TCPServer : MonoBehaviour
     SceneManagement sceneManagement;
     public string IPAddr = "127.0.0.1";
     public int port = -1;
-    public int msPerTransmit = 100;
+    public float msPerTransmit = 0.1f;
     private float currentTime = 0;
     public string ui_message = "Closed";
     private Thread threadRust;
@@ -352,6 +363,10 @@ public class TCPServer : MonoBehaviour
     public bool simCB_Connected = false;
     TcpClient simCB_client;
     private byte[] simCB_buffer;
+    public ushort simCB_ID = 60000;
+    public float simCB_currentTime = 0;
+    public float simCB_imu_currentTime = 0;
+    public const float SIMCB_IMU_INTERVAL = 0.1f; // every N second send one imu packet 
     List<CommandPacket> simCB_receiveCommandsPool = new List<CommandPacket>(64);
     List<CommandPacket> simCB_sendCommandsPool = new List<CommandPacket>(64);
     CommandPacket simCB_receiveLoadingPacket;
@@ -374,8 +389,13 @@ public class TCPServer : MonoBehaviour
         
     }
     void Update(){
-        currentTime += (int)(Time.deltaTime * 1000);
-        if (currentTime > 1000000) {currentTime = 0;}
+        if (serverStarted) {
+            currentTime += Time.deltaTime * 1000;
+        }
+        if (simCB_Connected) {
+            simCB_currentTime += Time.deltaTime * 1000;
+            simCB_imu_currentTime += Time.deltaTime;
+        }
         if (!serverStarted && runServer) {
             startThread();
             serverStarted = true;
@@ -434,6 +454,7 @@ public class TCPServer : MonoBehaviour
                                             id: simCB_id,
                                             header: commandsHeader["SIMDAT"],
                                             data: simCB_imu_data));
+        simCB_sendCommandsPool[simCB_sendCommandsPool.Count-1].log = false;
     }
     void GetData(int port)
     {
@@ -477,6 +498,7 @@ public class TCPServer : MonoBehaviour
     void GetDataSimCB(){
         NetworkStream nwStream = simCB_client.GetStream();
         SimHijack();
+        simCB_ID += 1;
         while (simCB_Connected)
         {
             Connection(simCB_client, nwStream, true);
@@ -484,18 +506,18 @@ public class TCPServer : MonoBehaviour
     }
     bool Connection(TcpClient client, NetworkStream nwStream, bool isSimCB)
     {
-        if (currentTime > msPerTransmit){
-            //Debug.Log(currentTime);
-            if (isSimCB) {
-                if (simCB_sendCommandsPool.Count > 0) {
-                    ParseSendData(nwStream, isSimCB);
-                }
-            } else {
-                if (sendCommandsPool.Count > 0) {
-                    ParseSendData(nwStream, isSimCB);
-                }
+        //Debug.Log(currentTime);
+        if (isSimCB) {
+            //Debug.Log(simCB_currentTime);
+            if (simCB_currentTime > msPerTransmit && simCB_sendCommandsPool.Count > 0) {
+                ParseSendData(nwStream, isSimCB);
+                simCB_currentTime = 0;
             }
-            currentTime = 0;
+        } else {
+            if (currentTime > msPerTransmit && sendCommandsPool.Count > 0) {
+                ParseSendData(nwStream, isSimCB);
+                currentTime = 0;
+            }
         }
         // Read data from the network stream
         if (nwStream.DataAvailable){
@@ -520,7 +542,7 @@ public class TCPServer : MonoBehaviour
                     process_code = (byte)(process_code | PROCESS_CODES.SIMCB_REPLY);
                     switch (process_code) {
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.ACK_REPLY):
-                            Debug.Log("simCB replying to Rust with ACK");
+                            Debug.Log("simCB replying to Rust with ACK" + simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].ToString());
                             sendCommandsPool.Add(
                                 new CommandPacket(sceneManagement, 
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body,
@@ -534,6 +556,16 @@ public class TCPServer : MonoBehaviour
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body,
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body.Length
                                                 ));
+                            break;
+                        case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.SIM_DATA):
+                            if(simCB_sendCommandsPool.Count < 1){
+                                Debug.Log("simCB robot IMU packet");
+                                SimData(sceneManagement.getRobotIMU(), simCB_ID);
+                                simCB_ID += 1;
+                            }
+                            if (simCB_imu_currentTime > SIMCB_IMU_INTERVAL){ 
+                                simCB_imu_currentTime = 0;
+                            }
                             break;
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.NO_REPLY):
                             break;
@@ -589,7 +621,7 @@ public class TCPServer : MonoBehaviour
             //Debug.Log("No msg received");
         return true;
     }
-    void ParseSendData(NetworkStream nwStream, bool isSimCB){
+    void ParseSendData(NetworkStream nwStream, bool isSimCB, bool log = true){
         if (isSimCB) {
             if (simCB_sendCommandsPool.Count > 128) {
                 Debug.LogWarning("simCB: TCP Send Command Pool Overflow");
@@ -598,7 +630,9 @@ public class TCPServer : MonoBehaviour
             if (simCB_Connected) {
                 //Debug.Log("Sending simCB packet");
                 if (simCB_sendCommandsPool[0].sendPacket(nwStream, 10)) {
-                    Debug.Log("Sent simCB: " + simCB_sendCommandsPool[0].ToString());
+                    if (log){
+                        Debug.Log("Sent simCB: " + simCB_sendCommandsPool[0].ToString());
+                    }
                     simCB_sendCommandsPool.RemoveAt(0);
                 };
                 return;
@@ -612,7 +646,8 @@ public class TCPServer : MonoBehaviour
         }
         // process the earlies send command (Last in last out)
         // because new send may be added to the pool
-        if (sendCommandsPool[0].sendPacket(nwStream, 2)) {
+        Debug.Log(sendCommandsPool.Count);
+        if (sendCommandsPool[0].sendPacket(nwStream, 10)) {
             Debug.Log("Complete Send to Rust");
             sendCommandsPool.RemoveAt(0);
         } else {
