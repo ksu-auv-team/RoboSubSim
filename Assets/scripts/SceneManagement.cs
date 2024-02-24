@@ -81,7 +81,7 @@ public class SceneManagement : MonoBehaviour
     public void setupTCPServer( string IPAddr = "127.0.0.1", 
                                 int port = 1234, 
                                 bool runServer = false, 
-                                int msPerTransmit = 100){
+                                float msPerTransmit = 11.0f){
         loadTCPServer();
         tcpServer.IPAddr = IPAddr;
         tcpServer.port = port;

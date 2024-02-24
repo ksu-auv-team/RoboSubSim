@@ -6,12 +6,15 @@ using System.Threading;
 using System.Collections.Generic;
 
 public class PROCESS_CODES{
+    public const byte NO_REPLY 	  = 0b0000_0000;
     public const byte SIMCB_REPLY = 0b1000_0000;
-    public const byte NO_REPLY = 0b0000_0000;
-    public const byte ACK_REPLY = 11;
-    public const byte WDGS_REPLY = 12;
+    public const byte UNITY_REPLY = 0b0100_0000;
+    public const byte SIM_DATA    = 0b0010_0000;
+    
+    public const byte ACK_REPLY   = 0b0000_0001;
+    public const byte WDGS_REPLY  = 0b0000_0010;
     public const byte CHANGED_REPLY = 13;
-    public const byte SIM_DATA = 14;
+    
 }
 public class CommandPacket{
     public byte[] body; // include id, body, crc
@@ -173,6 +176,8 @@ public class CommandPacket{
                         //Debug.Log("ID: " 
                         //        + System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) 
                         //        + " Code: " + body[7]);
+                        
+                        // if <id> is from rust to cb, reply rust with ack, else from simulator, no reply
                         if (System.BitConverter.ToUInt16(new byte[] {body[6], body[5]}, 0) < 60000){
                             process_code = PROCESS_CODES.ACK_REPLY;
                         } else {process_code = PROCESS_CODES.NO_REPLY;}
@@ -187,7 +192,7 @@ public class CommandPacket{
                         //Debug.Log("Vals: " + string.Join(",", motor_power));
                         //sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
                         //                                motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
-                        //break;
+                        break;
                         goto default;
                     case "SASSISTTN":
                         int newLength = body.Length-4;
@@ -205,37 +210,52 @@ public class CommandPacket{
                         break;
                         //goto default;
                     case "LOCAL":
+                        break;
                         goto default;
                     case "GLOBAL":
+                        break;
                         goto default;
                     case "RELDOF":
+                        break;
                         goto default;
                     case "BNO055P":
+                        break;
                         goto default;
                     case "MS5837P":
+                        break;
                         goto default;
                     case "WDGF":
+                        break;
                         goto default;
                     case "BNO055R":
+                        break;
                         goto default;
                     case "MS5837R":
+                        break;
                         goto default;
                     case "MMATS":
+                        break;
                         goto default;
                     case "MMATU":
+                        break;
                         goto default;
                     case "TINV":
+                        break;
                         goto default;
                     case "BNO055A":
+                        break;
                         goto default;
                     // simulation environment commands
                     case "CAPTUREU":
+                    	process_code = PROCESS_CODES.UNITY_REPLY;
                         goto default;
                     case "RESETU":
                         sceneManagement.sceneSelect = body[8];
                         sceneManagement.sceneRefresh = true;
+                        process_code = PROCESS_CODES.UNITY_REPLY;
                         break;
                     case "ROBOTSELU":
+                    	process_code = PROCESS_CODES.UNITY_REPLY;
                         goto default;
                     case "HEARTBEAT":
                         process_code = PROCESS_CODES.NO_REPLY;
@@ -340,6 +360,7 @@ public class TCPServer : MonoBehaviour
             // simCB
             "HEARTBEAT", "SIMHIJACK", "SIMDAT", "SIMSTAT"
         };
+    public int receive_buffer_size = 8;
     Dictionary<string, byte[]> commandsHeader = new Dictionary<string, byte[]>();
     SceneManagement sceneManagement;
     public string IPAddr = "127.0.0.1";
@@ -380,10 +401,10 @@ public class TCPServer : MonoBehaviour
         sceneManagement = GetComponent<SceneManagement>();
         receiveLoadingPacket = new CommandPacket(128, sceneManagement);
         sendLoadingPacket = new CommandPacket(128, sceneManagement);
-        buffer = new byte[10];
+        buffer = new byte[receive_buffer_size];
         threadRust = new Thread(() => GetData(port));
 
-        simCB_buffer = new byte[10];
+        simCB_buffer = new byte[receive_buffer_size];
         simCB_receiveLoadingPacket = new CommandPacket(128, sceneManagement);
         simCB_sendLoadingPacket = new CommandPacket(128, sceneManagement);
         
@@ -409,7 +430,7 @@ public class TCPServer : MonoBehaviour
 
         if (simCB_Connect && !simCB_Connected) {
             simCB_client = new TcpClient(simCB_IPAddr, simCB_Port);
-            simCB_client.ReceiveBufferSize = 8;
+            simCB_client.ReceiveBufferSize = receive_buffer_size;
             simCB_Connected = true;
             threadSimCB = new Thread(() => GetDataSimCB());
             threadSimCB.Start();
@@ -478,7 +499,7 @@ public class TCPServer : MonoBehaviour
         TcpClient client = server.AcceptTcpClient();
 
         // TODO: FIND BETTER MESSAGE PROCESSING METHODS SO THIS NUMBER CAN BE AS LOW AS POSSIBLE
-        client.ReceiveBufferSize = 8;  
+        client.ReceiveBufferSize = receive_buffer_size;  
 
         NetworkStream nwStream = client.GetStream();
         ui_message = "Connected:"+IPAddr+":"+port;
@@ -522,10 +543,11 @@ public class TCPServer : MonoBehaviour
         // Read data from the network stream
         if (nwStream.DataAvailable){
             int bytesRead = 0;
+            
             if (isSimCB){
-                bytesRead = nwStream.Read(simCB_buffer, 0, client.ReceiveBufferSize);
+                bytesRead = nwStream.Read(simCB_buffer, 0, simCB_buffer.Length);
             } else {
-                bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+                bytesRead = nwStream.Read(buffer, 0, buffer.Length);
             }
             //print(bytesRead);
             ParseReceivedData(bytesRead, isSimCB);
@@ -568,6 +590,9 @@ public class TCPServer : MonoBehaviour
                             }
                             break;
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.NO_REPLY):
+                            break;
+                        case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.UNITY_REPLY):
+                            Debug.Log("Processed command for Unity");
                             break;
                         default:
                             break;
@@ -629,7 +654,7 @@ public class TCPServer : MonoBehaviour
             }
             if (simCB_Connected) {
                 //Debug.Log("Sending simCB packet");
-                if (simCB_sendCommandsPool[0].sendPacket(nwStream, 10)) {
+                if (simCB_sendCommandsPool[0].sendPacket(nwStream, 6)) {
                     if (log){
                         Debug.Log("Sent simCB: " + simCB_sendCommandsPool[0].ToString());
                     }
@@ -647,7 +672,7 @@ public class TCPServer : MonoBehaviour
         // process the earlies send command (Last in last out)
         // because new send may be added to the pool
         Debug.Log(sendCommandsPool.Count);
-        if (sendCommandsPool[0].sendPacket(nwStream, 10)) {
+        if (sendCommandsPool[0].sendPacket(nwStream, 6)) {
             Debug.Log("Complete Send to Rust");
             sendCommandsPool.RemoveAt(0);
         } else {
