@@ -198,53 +198,53 @@ public class CommandPacket{
                         int newLength = body.Length-4;
                         byte[] temp = new byte[newLength];
                         System.Buffer.BlockCopy(body, 0, temp, 0, 2);
-                        temp[2] = 83; // 'P'
+                        temp[2] = 80; // 'P'
                         temp[3] = 73; // 'I'
                         temp[4] = 68; // 'D'
                         System.Buffer.BlockCopy(body, 9, temp, 5, newLength-5);
                         Debug.Log("original: " + ToString());
                         body = temp;
-                        System.Buffer.BlockCopy(crc_itt16_false(newLength), 0, body, newLength-2, 2);
+                        System.Buffer.BlockCopy(crc_itt16_false(newLength-2), 0, body, newLength-2, 2);
                         Debug.Log("transformed: " + ToString());
                         process_code = PROCESS_CODES.CHANGED_REPLY;
                         break;
                         //goto default;
                     case "LOCAL":
                         break;
-                        goto default;
+                        //goto default;
                     case "GLOBAL":
                         break;
-                        goto default;
+                        //goto default;
                     case "RELDOF":
                         break;
-                        goto default;
+                        //goto default;
                     case "BNO055P":
                         break;
-                        goto default;
+                        //goto default;
                     case "MS5837P":
                         break;
-                        goto default;
+                        //goto default;
                     case "WDGF":
                         break;
-                        goto default;
+                        //goto default;
                     case "BNO055R":
                         break;
-                        goto default;
+                        //goto default;
                     case "MS5837R":
                         break;
-                        goto default;
+                        //goto default;
                     case "MMATS":
                         break;
-                        goto default;
+                        //goto default;
                     case "MMATU":
                         break;
-                        goto default;
+                        //goto default;
                     case "TINV":
                         break;
-                        goto default;
+                        //goto default;
                     case "BNO055A":
                         break;
-                        goto default;
+                        //goto default;
                     // simulation environment commands
                     case "CAPTUREU":
                     	process_code = PROCESS_CODES.UNITY_REPLY;
@@ -459,7 +459,8 @@ public class TCPServer : MonoBehaviour
     }
     void SimData(IMU imu, ushort simCB_id = 60000){
         byte[] simCB_imu_data = new byte[20];
-        Debug.Log(System.BitConverter.IsLittleEndian);
+        Debug.Log("Little Endian: " + System.BitConverter.IsLittleEndian);
+        //Debug.Log("IMU (wxyz): " + imu.quaternion + " Depth: " + imu.robotPosition.z);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                 imu.quaternion.w), 0, simCB_imu_data, 0, 4);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
@@ -594,6 +595,11 @@ public class TCPServer : MonoBehaviour
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.UNITY_REPLY):
                             Debug.Log("Processed command for Unity");
                             break;
+                        case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.CHANGED_REPLY):
+                            simCB_sendCommandsPool.Add(new CommandPacket(sceneManagement,
+                                                        simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body,
+                                                        simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body.Length));
+                            break;
                         default:
                             break;
                     }
@@ -612,11 +618,21 @@ public class TCPServer : MonoBehaviour
                         // SimCB
                         // copy command to send to simCB
                         // Debug.Log("Copying rust command to simCB send pool");
-                        simCB_sendCommandsPool.Add(
-                            new CommandPacket(sceneManagement, 
-                                            receiveCommandsPool[receiveCommandsPool.Count-1].body,
-                                            receiveCommandsPool[receiveCommandsPool.Count-1].body.Length)
-                                            );
+                        byte process_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
+                        switch (process_code) {
+                            case (PROCESS_CODES.UNITY_REPLY):
+                                Debug.Log("Processed command for Unity");
+                                break;
+                            default:
+                                Debug.Log("Copying rust command to simCB send pool");
+                                simCB_sendCommandsPool.Add(
+                                new CommandPacket(sceneManagement, 
+                                                receiveCommandsPool[receiveCommandsPool.Count-1].body,
+                                                receiveCommandsPool[receiveCommandsPool.Count-1].body.Length)
+                                                );
+                                break;
+                        }
+                        
                     } else {
                         // Rust only
                         byte process_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);

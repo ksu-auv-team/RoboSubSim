@@ -98,7 +98,7 @@ public class RobotIMU : MonoBehaviour
         // acc = (v1 - v0) / dt
         imu.linearAccel = (m_rigidbody.velocity - imu.linearVel)/Time.fixedDeltaTime; 
         imu.linearVel = m_rigidbody.velocity;
-        
+        imu.UnityToRobotPos();
         imu.applyAccelNoise();
         imu.applyGyroNoise();
         imu.elapsedTime += Time.fixedDeltaTime;
