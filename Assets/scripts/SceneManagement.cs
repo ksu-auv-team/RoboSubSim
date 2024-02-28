@@ -118,31 +118,38 @@ public class SceneManagement : MonoBehaviour
         ui_script.Mass.text = mass.ToString();
         ui_script.Volume.text = volume.ToString();
     }
-    public void configRobotCamera(int height, int width, int mode, int robotID = 0){
+    public void configRobotCamera(int height = -1, int width = -1, int mode = -1, int robotID = 0){
         GameObject robot = selectObject(ROBOT, robotID);
         RobotCamera script = allRobots[robotID].cameraScript;
-        if (script.imgHeight != height || script.imgWidth != width){
-            script.imgHeight = height;
-            script.imgWidth = width;
-            
-            // check current tcp server (kill and re-enable on new robot)
-            //bool hasServer = tcpServer.runServer;
-            //if (hasServer) {setupTCPServer(tcpServer.IPAddr, tcpServer.port, false, tcpServer.msPerTransmit);}
-            
-            // create a new robot with proper perception camera resolutions
-            GameObject newrobot = copyNewObject(robot);
-            Destroy(robot);
-            replaceObjectInArray(newrobot, ROBOT, robotID);
-            script = newrobot.GetComponent<RobotCamera>();
-            //if (hasServer) {setupTCPServer(tcpServer.IPAddr, tcpServer.port, true, tcpServer.msPerTransmit);}
-            // copy settings to new robot
-             
-        }
-        script.configCommand(mode);
+        if (height > 0 && width > 0){
+            if (script.imgHeight != height || script.imgWidth != width){
+                script.imgHeight = height;
+                script.imgWidth = width;
 
-        ui_script.ImageHeight.text = height.ToString();
-        ui_script.ImageWidth.text = width.ToString();
-        ui_script.cameraModeDropdown.value = mode;
+                // check current tcp server (kill and re-enable on new robot)
+                //bool hasServer = tcpServer.runServer;
+                //if (hasServer) {setupTCPServer(tcpServer.IPAddr, tcpServer.port, false, tcpServer.msPerTransmit);}
+
+                // create a new robot with proper perception camera resolutions
+                GameObject newrobot = copyNewObject(robot);
+                Destroy(robot);
+                replaceObjectInArray(newrobot, ROBOT, robotID);
+                script = newrobot.GetComponent<RobotCamera>();
+                //if (hasServer) {setupTCPServer(tcpServer.IPAddr, tcpServer.port, true, tcpServer.msPerTransmit);}
+                // copy settings to new robot
+            }
+        }
+        if (mode > 0){
+            script.configCommand(mode);
+        }
+        ui_script.ImageHeight.text = script.imgHeight.ToString();
+        ui_script.ImageWidth.text = script.imgWidth.ToString();
+        ui_script.cameraModeDropdown.value = (int)script.currentCommand;
+    }
+    public int getCameraMode(int robotID = 0){
+        GameObject robot = selectObject(ROBOT, robotID);
+        RobotCamera script = allRobots[robotID].cameraScript;
+        return (int)script.currentCommand;
     }
     /// <summary>
     /// Robot Actions

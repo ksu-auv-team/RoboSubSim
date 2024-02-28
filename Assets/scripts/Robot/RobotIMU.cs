@@ -5,6 +5,7 @@ public struct IMU{
         public Vector3 linearAccel;
         public Vector3 linearVel;
         public Quaternion quaternion;
+        public Quaternion robotRotation;
         public float accelNoise;
         public float accelNoiseDrift;
         public Vector3 accumulatedAccelDrift;
@@ -26,6 +27,7 @@ public struct IMU{
             accumulatedGyroDrift = new Quaternion(0,0,0,1);
             position = new Vector3(0,0,0);
             robotPosition = new Vector3(0,0,0);
+            robotRotation = new Quaternion(0,0,0,1);
             elapsedTime = 0;
         }
         public void applyAccelNoise(){
@@ -53,6 +55,12 @@ public struct IMU{
             robotPosition.y = position.x;
             robotPosition.z = position.y;
         }
+        public void UnityToRobotRot(){
+            robotRotation.w = -quaternion.w;
+            robotRotation.z = quaternion.y;
+            robotRotation.y = quaternion.x;
+            robotRotation.x = -quaternion.z;
+        }
 }
 public class RobotIMU : MonoBehaviour
 {
@@ -71,7 +79,8 @@ public class RobotIMU : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        resetIMUWithNoise();
+        //resetIMUWithNoise(accelNoise, accelNoiseDrift, gyroNoise, gyroNoiseDrift);
+        resetIMUWithoutNoise();
         m_rigidbody = this.GetComponent<Rigidbody>();
     }
     void resetIMUWithNoise(float accN = 150f, float accD = 0f, float gyroN = 0.1f, float gyroD = 1.5f){
@@ -98,11 +107,14 @@ public class RobotIMU : MonoBehaviour
         // acc = (v1 - v0) / dt
         imu.linearAccel = (m_rigidbody.velocity - imu.linearVel)/Time.fixedDeltaTime; 
         imu.linearVel = m_rigidbody.velocity;
-        imu.UnityToRobotPos();
+        
         imu.applyAccelNoise();
         imu.applyGyroNoise();
         imu.elapsedTime += Time.fixedDeltaTime;
         //print(imu.quaternion.eulerAngles);
+
+        imu.UnityToRobotPos();
+        imu.UnityToRobotRot();
     }
     
 }

@@ -10,7 +10,7 @@ public class PROCESS_CODES{
     public const byte SIMCB_REPLY = 0b1000_0000;
     public const byte UNITY_REPLY = 0b0100_0000;
     public const byte SIM_DATA    = 0b0010_0000;
-    
+    public const byte SIM_WDGF    = 0b0001_0000;
     public const byte ACK_REPLY   = 0b0000_0001;
     public const byte WDGS_REPLY  = 0b0000_0010;
     public const byte CHANGED_REPLY = 13;
@@ -162,9 +162,14 @@ public class CommandPacket{
                         //Debug.Log("SIMSTAT: " + ToString());
                         float[] motor_power = ParseFloats(body, 8, 9);
                         Debug.Log("Vals: " + string.Join(",", motor_power) + " Mode: " + body[body.Length-4] + " WDog Status: " + body[body.Length-3]);
+                        if (body[body.Length-3] == 1){
+                            process_code = PROCESS_CODES.SIM_DATA;
+                            break;
+                        }
                         sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
                                                         motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
                         process_code = PROCESS_CODES.SIM_DATA;
+                        //process_code |= PROCESS_CODES.SIM_WDGF;
                         break;
                     case "ACK":
                         if(body[7] != 0) {
@@ -187,13 +192,6 @@ public class CommandPacket{
                         process_code = PROCESS_CODES.WDGS_REPLY;
                         //Debug.Log("WDGS: " + ToString());
                         break;
-                    case "RAW":
-                        //float[] motor_power = ParseFloats(body, 8, 5);
-                        //Debug.Log("Vals: " + string.Join(",", motor_power));
-                        //sceneManagement.setMotorPower(  motor_power[0],motor_power[1],motor_power[2],motor_power[3],
-                        //                                motor_power[4],motor_power[5],motor_power[6],motor_power[7]);
-                        break;
-                        goto default;
                     case "SASSISTTN":
                         int newLength = body.Length-4;
                         byte[] temp = new byte[newLength];
@@ -208,50 +206,25 @@ public class CommandPacket{
                         Debug.Log("transformed: " + ToString());
                         process_code = PROCESS_CODES.CHANGED_REPLY;
                         break;
-                        //goto default;
-                    case "LOCAL":
-                        break;
-                        //goto default;
-                    case "GLOBAL":
-                        break;
-                        //goto default;
-                    case "RELDOF":
-                        break;
-                        //goto default;
-                    case "BNO055P":
-                        break;
-                        //goto default;
-                    case "MS5837P":
-                        break;
-                        //goto default;
-                    case "WDGF":
-                        break;
-                        //goto default;
-                    case "BNO055R":
-                        break;
-                        //goto default;
-                    case "MS5837R":
-                        break;
-                        //goto default;
-                    case "MMATS":
-                        break;
-                        //goto default;
-                    case "MMATU":
-                        break;
-                        //goto default;
-                    case "TINV":
-                        break;
-                        //goto default;
-                    case "BNO055A":
-                        break;
-                        //goto default;
                     // simulation environment commands
                     case "CAPTUREU":
+                        if (sceneManagement.getCameraMode() == body[10]){
+                            sceneManagement.captureImage(body[10]);
+                        } else {
+                            sceneManagement.configRobotCamera(mode : body[10]);
+                            sceneManagement.captureImage(body[10]);
+                        }
                     	process_code = PROCESS_CODES.UNITY_REPLY;
-                        goto default;
-                    case "RESETU":
+                        break;
+                    case "CAMCFGU":
+                        int cheight = System.BitConverter.ToInt32(body, 9);
+                        int cwidth = System.BitConverter.ToInt32(body, 13);
+                        sceneManagement.configRobotCamera(height: cheight, width: cwidth, mode : body[17]);
+                        process_code = PROCESS_CODES.UNITY_REPLY;
+                        break;
+                    case "SETENVU":
                         sceneManagement.sceneSelect = body[8];
-                        sceneManagement.sceneRefresh = true;
+                        sceneManagement.ResetScene();
                         process_code = PROCESS_CODES.UNITY_REPLY;
                         break;
                     case "ROBOTSELU":
@@ -261,7 +234,7 @@ public class CommandPacket{
                         process_code = PROCESS_CODES.NO_REPLY;
                         break;
                     default:
-                        Debug.Log("Unimplemented command (sending to simCB if possible): " + command.Key);
+                        Debug.Log("Unimplemented command: " + command.Key);
                         break;
                 }
             }
@@ -350,11 +323,11 @@ public class TCPServer : MonoBehaviour
     readonly string[] POSSIBLE_COMMANDS = new string[] {
             // control board commands
             "RAW", "LOCAL", "GLOBAL", "RELDOF", "BNO055P", "MS5837P", "WDGS", "BNO055R", "MS5837R",
-            "MMATS", "MMATU", "TINV", "BNO055A",
+            "MMATS", "MMATU", "TINV", "BNO055A", "WDGF",
             // other commands
             "SASSISTTN",
             // unity commands
-            "CAPTUREU", "RESETU", "CAMCFGU", "ROBOTSELU",
+            "CAPTUREU", "SETENVU", "CAMCFGU", "ROBOTSELU", "ROBOTCFGU", "RANDENVU", "SIMCBU",
             // acknowledge
             "ACK",
             // simCB
@@ -459,16 +432,16 @@ public class TCPServer : MonoBehaviour
     }
     void SimData(IMU imu, ushort simCB_id = 60000){
         byte[] simCB_imu_data = new byte[20];
-        Debug.Log("Little Endian: " + System.BitConverter.IsLittleEndian);
-        //Debug.Log("IMU (wxyz): " + imu.quaternion + " Depth: " + imu.robotPosition.z);
+        //Debug.Log("Little Endian: " + System.BitConverter.IsLittleEndian);
+        Debug.Log("IMU (xyzw): " + imu.robotRotation + " Depth: " + imu.robotPosition.z);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.quaternion.w), 0, simCB_imu_data, 0, 4);
+                                imu.robotRotation.w), 0, simCB_imu_data, 0, 4);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.quaternion.x), 0, simCB_imu_data, 4, 4);
+                                imu.robotRotation.x), 0, simCB_imu_data, 4, 4);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.quaternion.y), 0, simCB_imu_data, 8, 4);
+                                imu.robotRotation.y), 0, simCB_imu_data, 8, 4);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-                                imu.quaternion.z), 0, simCB_imu_data, 12, 4);
+                                imu.robotRotation.z), 0, simCB_imu_data, 12, 4);
         System.Buffer.BlockCopy(System.BitConverter.GetBytes(
                                 imu.robotPosition.z), 0, simCB_imu_data, 16, 4);
         simCB_sendCommandsPool.Add(
@@ -565,7 +538,7 @@ public class TCPServer : MonoBehaviour
                     process_code = (byte)(process_code | PROCESS_CODES.SIMCB_REPLY);
                     switch (process_code) {
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.ACK_REPLY):
-                            Debug.Log("simCB replying to Rust with ACK" + simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].ToString());
+                            Debug.Log("simCB replying to Rust with ACK: " + simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].ToString());
                             sendCommandsPool.Add(
                                 new CommandPacket(sceneManagement, 
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body,
@@ -580,6 +553,27 @@ public class TCPServer : MonoBehaviour
                                                 simCB_receiveCommandsPool[simCB_receiveCommandsPool.Count-1].body.Length
                                                 ));
                             break;
+                        //case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.SIM_DATA | PROCESS_CODES.SIM_WDGF):
+                            //if(sendCommandsPool.Count > 1){
+                            //    goto case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.SIM_DATA);
+                            //}
+                            //if(simCB_sendCommandsPool.Count < 1){
+                            //    Debug.Log("simCB robot IMU packet");
+                            //    SimData(sceneManagement.getRobotIMU(), simCB_ID);
+                            //    simCB_ID += 1;
+                            //    sendCommandsPool.Add(
+                            //    new CommandPacket(sceneManagement,
+                            //                    id: 0,
+                            //                    header: commandsHeader["WDGF"],
+                            //                    data: new byte[] { }
+                            //                    )
+                            //                );
+                            //}
+                            //if (simCB_imu_currentTime > SIMCB_IMU_INTERVAL){ 
+                            //    simCB_imu_currentTime = 0;
+                            //}
+                            //break;
+                            //goto case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.SIM_DATA);
                         case (PROCESS_CODES.SIMCB_REPLY | PROCESS_CODES.SIM_DATA):
                             if(simCB_sendCommandsPool.Count < 1){
                                 Debug.Log("simCB robot IMU packet");
@@ -635,6 +629,7 @@ public class TCPServer : MonoBehaviour
                         
                     } else {
                         // Rust only
+                        // TODO: Modify this for asking sim cb connection and inital startup
                         byte process_code = receiveCommandsPool[receiveCommandsPool.Count-1].processCommand(commandsHeader);
                         if (process_code < 5) {
                             sendCommandsPool.Add(
@@ -691,35 +686,7 @@ public class TCPServer : MonoBehaviour
         if (sendCommandsPool[0].sendPacket(nwStream, 6)) {
             Debug.Log("Complete Send to Rust");
             sendCommandsPool.RemoveAt(0);
-        } else {
-            //Debug.Log("current count: " + sendCommandsPool[0].body_counter);
         }
-        //byte[] imu_buf = new byte[24];
-        //IMU imu = sceneManagement.getRobotIMU();
-        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-        //                        imu.quaternion.eulerAngles.z), 0, imu_buf, 0, 4);
-        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-        //                        360-imu.quaternion.eulerAngles.x), 0, imu_buf, 4, 4);
-        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-        //                        360-imu.quaternion.eulerAngles.y), 0, imu_buf, 8, 4);
-        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-        //                        -imu.linearAccel.z), 0, imu_buf, 12, 4);
-        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-        //                        imu.linearAccel.x), 0, imu_buf, 16, 4);
-        //System.Buffer.BlockCopy(System.BitConverter.GetBytes(
-        //                        imu.linearAccel.y), 0, imu_buf, 20, 4);
-        //if (sendCommandsPool.Count < 16){
-            //sendLoadingPacket = new CommandPacket(sceneManagement, id: 10, 
-            //                                                    header: commandsHeader["BNO055R"], 
-            //                                                    data: new byte[] {0}//imu_buf
-            //                                                    );
-            //CommandPacket newPacket = new CommandPacket(sceneManagement, sendLoadingPacket.body, sendLoadingPacket.bodyLen);
-            //sendCommandsPool.Add(newPacket);
-            
-        //}
-        //nwStream.Write(imu_buf,0,imu_buf.Length);
-                //Debug.Log(imu.quaternion.eulerAngles);
-                //Debug.Log(System.BitConverter.IsLittleEndian);
     }
     // Use-case specific function, need to re-write this to interpret whatever data is being sent
     void ParseReceivedData(int bytesRead, bool isSimCB)
