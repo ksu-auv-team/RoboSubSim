@@ -40,7 +40,18 @@ public class RobotForce : MonoBehaviour
     void Start()
     {
         imu_script = GetComponent<RobotIMU>();
-        m_rigidBody = GetComponent<Rigidbody>();
+        // m_rigidBody = GetComponent<Rigidbody>();
+        GameObject cube_wolf = GameObject.Find("cube_wolf");
+        m_rigidBody = cube_wolf.GetComponent<Rigidbody>();
+        if (m_rigidBody == null)
+        {
+            Debug.LogError("Rigidbody component not found on the GameObject.");
+        }
+        else
+        {
+            Debug.Log("Rigidbody component found.");
+        }
+        // Debug.Log(thrusters.Length);
         if (forceVisualMaterial != null){
             foreach (var thruster in thrusters) {
                 thruster.transform.Find("force_visual").gameObject.GetComponent<MeshRenderer>().material = forceVisualMaterial;
@@ -73,6 +84,10 @@ public class RobotForce : MonoBehaviour
         add_thruster_force(5, thrust_strengths[5] * strength * KGF_TO_N);
         add_thruster_force(6, thrust_strengths[6] * strength * KGF_TO_N);
         add_thruster_force(7, thrust_strengths[7] * strength * KGF_TO_N);
+    }
+    public void set_thrusts_strengths(float[] thrusts){
+        thrust_strengths = thrusts;
+        set_thrusts_strengths();
     }
     private void set_body_force(){
         var front_force = 4/Mathf.Sqrt(2)*limit_thruster_force(other_control[1] * strength * KGF_TO_N);
@@ -162,19 +177,21 @@ public class RobotForce : MonoBehaviour
         if (force < -MAX_FORCE * 1.85f/2.36f) {
             force = -MAX_FORCE * 1.85f/2.36f;
         }
+
         m_rigidBody.AddForceAtPosition(force * thrusters[id].transform.forward, thrusters[id].transform.position);
-        if (forceVisual) {
-            Transform force_visual = thrusters[id].transform.Find("force_visual");
-            if (force_visual != null) {
-                //print(force_visual.position);
-                //if (force < 0){
-                //    force_visual.localRotation = Quaternion.Euler(180,0,0);
-                //}
-                //force_visual.localPosition = new Vector3(0,0,(force/2)/MAX_FORCE);
-                var arrow_scale = (force)/MAX_FORCE;
-                force_visual.localScale = new Vector3(arrow_scale/5,arrow_scale/5,arrow_scale);
-            }
-        }
+
+        // if (forceVisual) {
+        //     Transform force_visual = thrusters[id].transform.Find("force_visual");
+        //     if (force_visual != null) {
+        //         //print(force_visual.position);
+        //         //if (force < 0){
+        //         //    force_visual.localRotation = Quaternion.Euler(180,0,0);
+        //         //}
+        //         //force_visual.localPosition = new Vector3(0,0,(force/2)/MAX_FORCE);
+        //         var arrow_scale = (force)/MAX_FORCE;
+        //         force_visual.localScale = new Vector3(arrow_scale/5,arrow_scale/5,arrow_scale);
+        //     }
+        // }
     }
 
     void FixedUpdate(){
