@@ -352,7 +352,7 @@ public class TCPServer : MonoBehaviour
 
     private Thread threadSimCB;
     public bool simCB_Connect = false;
-    public string simCB_IPAddr = "127.0.0.1";
+    public string simCB_IPAddr = "172.27.160.1";
     public int simCB_Port = 5014;
     public bool simCB_Connected = false;
     TcpClient simCB_client;
@@ -482,7 +482,13 @@ public class TCPServer : MonoBehaviour
         bool running;
         while (runServer)
         {
-            running = Connection(client, nwStream, false);
+            try{
+                running = Connection(client, nwStream, false);
+            }catch (System.Exception e){
+                runServer = false;
+                Debug.LogWarning("Connection Exception, closing connection: " + e);
+                break;
+            }
         }
         Debug.Log("Port:" + port + ", closed on " + IPAddr);
         server.Stop();
@@ -682,7 +688,7 @@ public class TCPServer : MonoBehaviour
         }
         // process the earlies send command (Last in last out)
         // because new send may be added to the pool
-        Debug.Log(sendCommandsPool.Count);
+        //Debug.Log(sendCommandsPool.Count);
         if (sendCommandsPool[0].sendPacket(nwStream, 6)) {
             Debug.Log("Complete Send to Rust");
             sendCommandsPool.RemoveAt(0);
