@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 1652.4304, g: 1482.4581, b: 1630.0862, a: 1}
+  m_IndirectSpecularColor: {r: 1652.4304, g: 1482.4786, b: 1630.0647, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -907,11 +907,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: cube_wolf
       objectReference: {fileID: 0}
-    - target: {fileID: 1501308199644629055, guid: b74ea355523470b4c968ffdd0a45ed84,
-        type: 3}
-      propertyPath: m_CullingMask.m_Bits
-      value: 55
-      objectReference: {fileID: 0}
     - target: {fileID: 2591459465121379850, guid: b74ea355523470b4c968ffdd0a45ed84,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -961,21 +956,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6734187022806580228, guid: b74ea355523470b4c968ffdd0a45ed84,
-        type: 3}
-      propertyPath: captureRgbImages
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6734187022806580228, guid: b74ea355523470b4c968ffdd0a45ed84,
-        type: 3}
-      propertyPath: showVisualizations
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7511512357573543901, guid: b74ea355523470b4c968ffdd0a45ed84,
-        type: 3}
-      propertyPath: m_CullingMask.m_Bits
-      value: 55
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

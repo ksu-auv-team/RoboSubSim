@@ -57,7 +57,7 @@ public struct IMU{
         }
         public void UnityToRobotRot(){
             robotRotation.w = quaternion.w;
-            robotRotation.z = -quaternion.y;
+            robotRotation.z = quaternion.y;
             robotRotation.y = quaternion.x;
             robotRotation.x = -quaternion.z;
 

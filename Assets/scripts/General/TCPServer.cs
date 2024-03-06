@@ -375,7 +375,7 @@ public class TCPServer : MonoBehaviour
         receiveLoadingPacket = new CommandPacket(128, sceneManagement);
         sendLoadingPacket = new CommandPacket(128, sceneManagement);
         buffer = new byte[receive_buffer_size];
-        threadRust = new Thread(() => GetData(port));
+        
 
         simCB_buffer = new byte[receive_buffer_size];
         simCB_receiveLoadingPacket = new CommandPacket(128, sceneManagement);
@@ -485,7 +485,7 @@ public class TCPServer : MonoBehaviour
             try{
                 running = Connection(client, nwStream, false);
             }catch (System.Exception e){
-                runServer = false;
+                serverStarted = false;
                 Debug.LogWarning("Connection Exception, closing connection: " + e);
                 break;
             }
@@ -688,7 +688,7 @@ public class TCPServer : MonoBehaviour
         }
         // process the earlies send command (Last in last out)
         // because new send may be added to the pool
-        //Debug.Log(sendCommandsPool.Count);
+        Debug.Log(sendCommandsPool.Count + nwStream.ToString());
         if (sendCommandsPool[0].sendPacket(nwStream, 6)) {
             Debug.Log("Complete Send to Rust");
             sendCommandsPool.RemoveAt(0);
@@ -729,6 +729,7 @@ public class TCPServer : MonoBehaviour
     }
 
     void startThread(){
+        threadRust = new Thread(() => GetData(port));
         threadRust.Start();
     }
     void stopThread(){

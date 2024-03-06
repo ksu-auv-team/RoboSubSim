@@ -84,6 +84,7 @@ public class SceneManagement : MonoBehaviour
                                 float msPerTransmit = 11.0f){
         loadTCPServer();
         tcpServer.IPAddr = IPAddr;
+        //tcpServer.simCB_IPAddr = IPAddr;
         tcpServer.port = port;
         tcpServer.runServer = runServer;
         tcpServer.msPerTransmit = msPerTransmit;
