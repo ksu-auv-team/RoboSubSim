@@ -56,15 +56,17 @@ public struct IMU{
             robotPosition.z = position.y;
         }
         public void UnityToRobotRot(){
-            robotRotation.w = quaternion.w;
-            robotRotation.z = quaternion.y;
-            robotRotation.y = quaternion.x;
-            robotRotation.x = -quaternion.z;
-
+            // change axis
             //robotRotation.w = quaternion.w;
-            //robotRotation.z = -quaternion.y;
-            //robotRotation.y = -quaternion.x;
-            //robotRotation.x = quaternion.z;
+            //robotRotation.z = quaternion.y;
+            //robotRotation.y = quaternion.x;
+            //robotRotation.x = -quaternion.z;
+
+            // negate (flip handness)
+            robotRotation.w = quaternion.w;
+            robotRotation.z = -quaternion.y;
+            robotRotation.y = -quaternion.x;
+            robotRotation.x = quaternion.z;
         }
 }
 public class RobotIMU : MonoBehaviour
